@@ -16,7 +16,7 @@ Every type object is a constructor-like function object. Every type object carri
 ## Typed Object
 _Typed objects_ are exotic objects that are instances of Type Objects. They carry a [[ViewedArrayBuffer]] internal slot, a [[Structure]] internal slot, a [[TypeObject]] and [[ByteOffset]] internal slot.
 
-### [[GetOwnProperty]] (P) on typed object
+### \[\[GetOwnProperty]] (P) on typed object
 When the [[GetOwnProperty]] internal method of an exotic typed object O is called with property key P the following steps are taken:
 1. Let s be a value of internal slot [[Structure]] of object o.
 1. Let field record r be a field record with name P from s
@@ -26,7 +26,7 @@ When the [[GetOwnProperty]] internal method of an exotic typed object O is calle
 1. Return a PropertyDescriptor { [[Value]] : value, [[Enumerable]]: isInteger, [[Writable]]: true, [[Configurable]]: false }
 
 
-### [[Get]](P, Receiver) on typed object
+### \[\[Get]](P, Receiver) on typed object
 When the [[Get]] internal method of an exotic typed object O is called with property key P and ECMAScript language 
 value Receiver the following steps are taken:
 
@@ -36,7 +36,7 @@ value Receiver the following steps are taken:
 1. Otherwise, return the result of calling the default ordinary object [[Get]] internal method (9.1.8) on O passing P and Receiver as arguments.
 
 
-###[[Set]] ( P, V, Receiver)
+###\[\[Set]] ( P, V, Receiver)
 
 When the [[Set]] internal method of an exotic typed object O is called with property key P, value V, and ECMAScript language value Receiver, the following steps are taken:
 
