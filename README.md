@@ -18,6 +18,7 @@ _Typed objects_ are exotic objects that are instances of Type Objects. They carr
 
 ### \[\[GetOwnProperty]] (P) on typed object
 When the [[GetOwnProperty]] internal method of an exotic typed object O is called with property key P the following steps are taken:
+
 1. Let s be a value of internal slot [[Structure]] of object o.
 1. Let field record r be a field record with name P from s
 1. Return undefined if r does exist
