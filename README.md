@@ -40,25 +40,6 @@ When the [[GetOwnProperty]] internal method of an exotic typed object O is calle
 1. Return a PropertyDescriptor { [[Value]] : value, [[Enumerable]]: isInteger, [[Writable]]: true, [[Configurable]]: false }
 
 
-### \[\[Get]](P, Receiver) on typed object
-When the [[Get]] internal method of an exotic typed object O is called with property key P and ECMAScript language 
-value Receiver the following steps are taken:
-
-1. Assert: IsPropertyKey(P) is true.
-1. If Type(P) is String and if SameValue(O, Receiver) is true, then
-    1. Return the result of GetFieldFromTypedObject (O, P).
-1. Otherwise, return the result of calling the default ordinary object [[Get]] internal method (9.1.8) on O passing P and Receiver as arguments.
-
-
-###\[\[Set]] ( P, V, Receiver)
-
-When the [[Set]] internal method of an exotic typed object O is called with property key P, value V, and ECMAScript language value Receiver, the following steps are taken:
-
-1. Assert: IsPropertyKey(P) is true.
-1. If Type(P) is String and if SameValue(O, Receiver) is true, then
-   1. Return the result of SetFieldInTypedObject(O, P, V).
-1. Otherwise Return the result of calling the default ordinary object [[Set]] internal method (9.1.8) on O passing P, V, and Receiver as arguments.
-
 
 ### \[\[GetPrototypeOf]]()
 
