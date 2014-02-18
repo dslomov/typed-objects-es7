@@ -58,7 +58,21 @@ When the [[Set]] internal method of an exotic typed object O is called with prop
 1. If Type(P) is String and if SameValue(O, Receiver) is true, then
    1. Return the result of SetFieldInTypedObject(O, P, V).
 1. Otherwise Return the result of calling the default ordinary object [[Set]] internal method (9.1.8) on O passing P, V, and Receiver as arguments.
-2. 
+
+
+### \[\[GetPrototypeOf]]()
+
+When [[GetPrototypeOf]] is called on typed object _O_, the following steps are taken:
+
+1. Let _typeObject_ be a value of _O_'s [[TypeObject]] internal slot.
+2. Let _proto_ be a result of Get(_typeObject_, "prototype").
+3. Return _proto_
+
+
+### \[\[IsExtensible]]()
+
+[[IsExtensible]] for typed object _O_ returns *false*.
+
 
 ### \[\[Structure]](O)
 
@@ -110,8 +124,6 @@ StructType called with _object_ argument performs the following steps:
 1. Set _O_'s \[\[Size\]\] to _size_.
 1. Return _O_.
 
-
-## ArrayType
 
 # Abstract Operations
 
