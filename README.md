@@ -20,17 +20,11 @@ Every type object is a constructor-like function object. Every type object carri
 
 ### Ground type objects
 
-# SameValue, SameValueZero and === algorithm on typed objects
-
-All three algorithms are modified in the same way:
-  - If _x_ and _y_ are typed objects:
-        - Return true if values of internal slots [[TypeObject]], [[ViewedArrayBuffer]], [[ByteOffset]] and 
-          [[Opacity]] are SameValue respectively.
-        - Return false otherwise.
 
 ## Typed Object
 _Typed objects_ are exotic objects that are created from Type Objects. They carry the following internal slots:
   - [[TypeObject]] 
+  - [[Dimensions]]
   - [[ViewedArrayBuffer]] 
   - [[ByteOffset]]
   - [[Opacity]]
@@ -72,6 +66,16 @@ For exotic typed object O:
 
 1. Let _typeObject_ be a value of [[TypeObject]] internal slot of _O_.
 2. Return a value of [[Structure]] internal slot of _typeObject_.
+
+### SameValue, SameValueZero and === algorithm on typed objects
+
+All three algorithms are modified in the same way:
+  - If _x_ and _y_ are typed objects
+      * Return true if the following holds:
+         1. values of interna.l slots [[TypeObject]], [[ViewedArrayBuffer]], [[ByteOffset]] and 
+            [[Opacity]] are SameValue respectively.
+         2. Values of internal slot [[Dimensions]] of _x_ and _y_ are identical lists of numbers.
+      * Return false otherwise.
 
 
 # Type Object Constructors
@@ -150,7 +154,7 @@ StructType called with _object_ argument performs the following steps:
 
 ## GetFieldFromTypedObject(typedObject, fieldName)
 
-1. Let structure be [[Structure]] from typedObject
+1. Let structure be [[Structure]] ( _typedObject_ )
 1. Let buffer be [[ViewedArrayBuffer]] from typedObject.
 1. Find field record r for fieldName in structure
 1. Return undefined if r does not exist
@@ -159,7 +163,7 @@ StructType called with _object_ argument performs the following steps:
 
 ## SetFieldInTypedObject(typedObject, fieldName, value)
 
-1. Let _structure_ be [[Structure]] from _typedObject_.
+1. Let _structure_ be [[Structure]] ( _typedObject_ ).
 1. Let _buffer_ be \[\[ViewedArrayBuffer\]\] from _typedObject_.
 1. Find field record _r_ for _fieldName_ in structure
 1. If r.type is value type, return SetValueInBuffer(buffer, byteIndex + r.byteIndex, value, r.type)
