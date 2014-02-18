@@ -122,6 +122,7 @@ TODO: convert N to integer number properly.
 3. Let _dimensions_ be _O_'s \[\[Dimensions\]\].
 4. Let _opacity_ be _O_'s \[\[Opacity\]\].
 5. Create a new type object _Result_.
+6. TODO: Set _Result_'s [[Prototype]] to the right thing, including caching.
 6. Set _Result_'s \[\[Structure]] to _structure_.
 7. Let _newDimesions_ be a result of appending _N_ to _dimensions_.
 8. Set _Result_'s \[\[Dimensions\]\] to _newDimensions_.
