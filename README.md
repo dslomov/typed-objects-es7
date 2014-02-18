@@ -20,13 +20,25 @@ Every type object is a constructor-like function object. Every type object carri
 
 ### Ground type objects
 
+# SameValue, SameValueZero and === algorithm on typed objects
+
+All three algorithms are modified in the same way:
+  - If _x_ and _y_ are typed objects:
+        - Return true if values of internal slots [[TypeObject]], [[ViewedArrayBuffer]], [[ByteOffset]] and 
+          [[Opacity]] are SameValue respectively.
+        - Return false otherwise.
+
 ## Typed Object
-_Typed objects_ are exotic objects that are instances of Type Objects. They carry a [[ViewedArrayBuffer]] internal slot, a [[Structure]] internal slot, a [[TypeObject]] and [[ByteOffset]] internal slot.
+_Typed objects_ are exotic objects that are created from Type Objects. They carry the following internal slots:
+  - [[TypeObject]] 
+  - [[ViewedArrayBuffer]] 
+  - [[ByteOffset]]
+  - [[Opacity]]
 
 ### \[\[GetOwnProperty]] (P) on typed object
 When the [[GetOwnProperty]] internal method of an exotic typed object O is called with property key P the following steps are taken:
 
-1. Let s be a value of internal slot [[Structure]] of object o.
+1. Let s be a result of Structure(O).
 1. Let field record r be a field record with name P from s
 1. Return undefined if r does exist
 1. Let value be a result of GetFieldFromTypedObject(o, P)
@@ -52,6 +64,14 @@ When the [[Set]] internal method of an exotic typed object O is called with prop
 1. If Type(P) is String and if SameValue(O, Receiver) is true, then
    1. Return the result of SetFieldInTypedObject(O, P, V).
 1. Otherwise Return the result of calling the default ordinary object [[Set]] internal method (9.1.8) on O passing P, V, and Receiver as arguments.
+2. 
+
+### \[\[Structure]](O)
+
+For exotic typed object O:
+
+1. Let _typeObject_ be a value of [[TypeObject]] internal slot of _O_.
+2. Return a value of [[Structure]] internal slot of _typeObject_.
 
 
 # Type Object Constructors
