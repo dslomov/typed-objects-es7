@@ -2,7 +2,9 @@
 
 ## Overview
 
-_Structure_: a collection of field records. Every field record is a triple {_name_ : property name, _byteOffset_ : integer, _type_ : fieldType}. 
+_Structure_: a list of field records. Every field record is a triple {_name_ : property name, _byteOffset_ : integer, _type_ : fieldType}. 
+
+_Dimensions_: A list of integers (positive).
 
 _fieldType_ is either a value type or an ECMAScript object, required to be a _type object_.
 
@@ -11,10 +13,14 @@ value types: uint8, int8, uint16, int16, uint32, int32, float32, float64, any, s
 ## Type Objects
 _Type object_ is an exotic object, constructable with a type object constructor (StructType or ArrayType). 
 
-Every type object is a constructor-like function object. Every type object carries a [[Structure]] internal slot and a \[\[Size]] internal slot.
+Every type object carries the following internal slots:
+  - [[Structure]] 
+  - \[\[Dimensions]]
+  - \[\[Opacity]]
+Type objects have a \[\[Call]] internal method defined. Its behaviour is specified below.
+  
 
 ### TypeObject(obj) constructor
-
 
 ### TypeObject(arrayBuffer\[, byteOffset\]) constructor 
 
@@ -102,8 +108,29 @@ StructType called with _object_ argument performs the following steps:
     1. Set _currentOffset_ to _currentOffset_ + _s_. 
 1. Let _size_ be _currentOffset_.
 1. Set _O_'s \[\[Structure\]\] to _structure_.
-1. Set _O_'s \[\[Size\]\] to _size_.
+1. Set _O_'s \[\[Dimensions\]\] to an empty list.
+1. Set _O_'s \[\[Opacity\]\] to Opaque(_structure_).
 1. Return _O_.
+
+
+### StructType.prototype.Array(N)
+
+TODO: convert N to integer number properly.
+
+1. Let _O_ be *this* value.
+2. Let _structure_ be _O_'s \[\[Structure]].
+3. Let _dimensions_ be _O_'s \[\[Dimensions\]\].
+4. Let _opacity_ be _O_'s \[\[Opacity\]\].
+5. Create a new type object _Result_.
+6. Set _Result_'s \[\[Structure]] to _structure_.
+7. Let _newDimesions_ be a result of appending _N_ to _dimensions_.
+8. Set _Result_'s \[\[Dimensions\]\] to _newDimensions_.
+7. Set _Result_'s \[\[Opacity\]\] to _opacity_.
+8. Return _Result_.
+
+### StructType.prototype.Opacity
+
+TODO: A copy of *this* with \[\[Opacity\]] set to *false* if it is true, *this* otherwise.
 
 
 # Abstract Operations
@@ -121,8 +148,31 @@ StructType called with _object_ argument performs the following steps:
    1. 2 for *uint16*, *int16*.
    1. 4 for *uint32*, *int32*, *float32*.
    1. 8 for *float64*.
-1. If _typeObject_ has a  \[\[Size\[]\] internal slot, return its value.
-1. Otherwise, throw *TypeError*.
+1. Let _structure_ be Structure(_typeObject_).
+2. Return Size(_structure_)
+
+
+## Size(structure)
+
+1. Let _currentOffset_ be zero.
+1. For each field record _r_ in _structure_:
+    1. Let _fieldType_ be _r_._fieldType_.
+    1. Let _alignment_ be a result of Alignment\(_fieldType_).
+    1. Set _currentOffset_ to a minimal integer equal to or greater than _currentOffset_ that 
+       is evenly divisible by _alignment_.
+    1. Let _s_ be Size\(_fieldType_\).
+    1. Set _currentOffset_ to _currentOffset_ + _s_. 
+1. Return _currentOffset_.
+
+
+## Size(_structure_, _dimensions_)
+
+_structure_ is a structure and _dimensions_ is a possibly empty list of integers.
+
+1. Let _baseSize_ be Size(_structure_).
+2. If _dimensions_ is an empty list, return _baseSize_.
+3. Let _count_ be a product of all integers in _dimensions_ list.
+4. Return _count_ * _baseSize_.
 
 
 ## InitializeTypeObjectInternals(O, arrayBuffer, byteOffset, typeObject)
@@ -143,11 +193,9 @@ StructType called with _object_ argument performs the following steps:
 1. Return _O_.
 
 
-
-
 ## GetFieldFromTypedObject(typedObject, fieldName)
 
-1. Let structure be [[Structure]] ( _typedObject_ )
+1. Let structure be Structure ( _typedObject_ )
 1. Let buffer be [[ViewedArrayBuffer]] from typedObject.
 1. Find field record r for fieldName in structure
 1. Return undefined if r does not exist
