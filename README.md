@@ -16,7 +16,7 @@ _Type designator_ is an exotic object that represents a shape of a typed object.
 
 Type desgnators carry the following internal slots:
   - [[Structure]], should have a structure value.
-  - [[Rank]], and integer.
+  - [[Rank]], an integer.
   - [[Opacity]], a boolean.
 Type designators represent a shape of typed object. Identical typed objects have identical type designator.
 
