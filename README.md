@@ -10,6 +10,20 @@ _fieldType_ is either a value type or an ECMAScript object, required to be a _ty
 
 value types: uint8, int8, uint16, int16, uint32, int32, float32, float64, any, string, object
 
+## Type Designators
+
+_Type designator_ is an exotic object that represents a shape of a typed object. 
+
+Type desgnators carry the following internal slots:
+  - [[Structure]], should have a structure value.
+  - [[Rank]], and integer.
+  - [[Opacity]], a boolean.
+Type designators represent a shape of typed object. Identical typed objects have identical type designator.
+
+Every struct type object is its own type designator.
+All array type objects with the same element type share their type designator.
+  
+
 ## Type Objects
 _Type object_ is an exotic object, constructable with a type object constructor (StructType or ArrayType). 
 
@@ -29,8 +43,8 @@ Type objects have a \[\[Call]] internal method defined. Its behaviour is specifi
 
 ## Typed Object
 _Typed objects_ are exotic objects that are created from Type Objects. They carry the following internal slots:
-  - [[TypeObject]] 
-  - [[Dimensions]]
+  - [[TypeDesignator]] 
+  - [[Dimensions]] - number of elements in dimensions should be equal to the rank of type designator.
   - [[ViewedArrayBuffer]] 
   - [[ByteOffset]]
   - [[Opacity]]
@@ -51,8 +65,8 @@ When the [[GetOwnProperty]] internal method of an exotic typed object O is calle
 
 When [[GetPrototypeOf]] is called on typed object _O_, the following steps are taken:
 
-1. Let _typeObject_ be a value of _O_'s [[TypeObject]] internal slot.
-2. Let _proto_ be a result of Get(_typeObject_, "prototype").
+1. Let _typeDesignator_ be a value of _O_'s [[TypeDesignator]] internal slot.
+2. Let _proto_ be a result of Get(_typeDesignator_, "prototype").
 3. Return _proto_
 
 
@@ -65,8 +79,8 @@ When [[GetPrototypeOf]] is called on typed object _O_, the following steps are t
 
 For exotic typed object O:
 
-1. Let _typeObject_ be a value of [[TypeObject]] internal slot of _O_.
-2. Return a value of [[Structure]] internal slot of _typeObject_.
+1. Let _typeDesignator_ be a value of [[TypeObject]] internal slot of _O_.
+2. Return a value of [[Structure]] internal slot of _typeDesignator_.
 
 ### SameValue, SameValueZero and === algorithm on typed objects
 
@@ -108,7 +122,7 @@ StructType called with _object_ argument performs the following steps:
     1. Set _currentOffset_ to _currentOffset_ + _s_. 
 1. Let _size_ be _currentOffset_.
 1. Set _O_'s \[\[Structure\]\] to _structure_.
-1. Set _O_'s \[\[Dimensions\]\] to an empty list.
+1. Set _O_'s \[\[Rank\]\] to 0.
 1. Set _O_'s \[\[Opacity\]\] to Opaque(_structure_).
 1. Return _O_.
 
@@ -136,20 +150,20 @@ TODO: A copy of *this* with \[\[Opacity\]] set to *false* if it is true, *this* 
 
 # Abstract Operations
 
-## Alignment(typeObject)
+## Alignment(typeDesignator)
 
-1. If _typeObject_ is one of the ground type objects return \[\[Size\]\](typeObject).
-1. Let _S_ be a value of _typeObject_'s \[\[Structure\]\] internal slot.
+1. If _typeDesignator_ is one of the ground type designators return \[\[Size\]\](typeObject).
+1. Let _S_ be a value of _typeDesignator_'s \[\[Structure\]\] internal slot.
 1. Return a maximum of Alignment(_t_) where _t_ goes over values of _fieldType_ properties of field records in _S_. 
 
-## Size(typeObject)
+## Size(typeDesignator)
 
-1. If _typeObject_ is one of the ground type objects return:
+1. If _typeDesignator_ is one of the ground type objects return:
    1. 1 for *uint8*, *int8*.
    1. 2 for *uint16*, *int16*.
    1. 4 for *uint32*, *int32*, *float32*.
    1. 8 for *float64*.
-1. Let _structure_ be Structure(_typeObject_).
+1. Let _structure_ be Structure(_typeDesignator_).
 2. Return Size(_structure_)
 
 
@@ -205,7 +219,7 @@ _structure_ is a structure and _dimensions_ is a possibly empty list of integers
 
 ## SetFieldInTypedObject(typedObject, fieldName, value)
 
-1. Let _structure_ be [[Structure]] ( _typedObject_ ).
+1. Let _structure_ be Structure ( _typedObject_ ).
 1. Let _buffer_ be \[\[ViewedArrayBuffer\]\] from _typedObject_.
 1. Find field record _r_ for _fieldName_ in structure
 1. If r.type is value type, return SetValueInBuffer(buffer, byteIndex + r.byteIndex, value, r.type)
