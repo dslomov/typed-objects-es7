@@ -31,6 +31,7 @@ Every type object carries the following internal slots:
   - [[Structure]] 
   - \[\[Dimensions]]
   - \[\[Opacity]]
+
 Type objects have a \[\[Call]] internal method defined. Its behaviour is specified below.
   
 
