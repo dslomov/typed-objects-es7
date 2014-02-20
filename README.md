@@ -5,7 +5,7 @@
 _Structure_: either
   - one of ``uint8``, ``int8``, ``uint16``, ``int16``, ``uint32``, ``int32``, ``float32``, ``float64``, 
     ``any``, ``string``, ``object`` (_ground structures_)
-  - an ordered list of `_FieldRecord_.
+  - an ordered list of _FieldRecord_s.
   -
 
 _FieldRecord_: a triple of {``name`` : property name, ``byteOffset`` : integer, ``type`` : _TypeObject_ }. 
