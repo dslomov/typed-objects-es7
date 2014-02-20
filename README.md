@@ -2,24 +2,25 @@
 
 ## Overview
 
-``Structure``: either
+_Structure_: either
   - one of ``uint8``, ``int8``, ``uint16``, ``int16``, ``uint32``, ``int32``, ``float32``, ``float64``, 
     ``any``, ``string``, ``object`` (_ground structures_)
-  - an ordered list of ``fieldRecord``
-  - 
-``FieldRecord``: a triple of {_name_ : property name, _byteOffset_ : integer, _type_ : ``TypeObject`` }. 
+  - an ordered list of `_FieldRecord_.
+  -
+
+_FieldRecord_: a triple of {``name`` : property name, ``byteOffset`` : integer, ``type`` : _TypeObject_ }. 
 
 _Dimensions_: A list of integers (positive).
 
 ## Type Designators
 
-``TypeDesignator`` is an exotic object that represents a shape of a typed object. 
+_TypeDesignator_ is an exotic object that represents a shape of a typed object. 
 
 Type designators carry the following internal slots:
-  - [[Structure]], should have a ``Structure`` value.
-  - [[Rank]], an integer.
-  - [[Opacity]], a boolean.
-  - [[ArrayDesignator]], either ``undefined`` or a _TypeDesignator_.
+  - ``[[Structure]]``, should have a _Structure_ value.
+  - ``[[Rank]]``, an integer.
+  - ``[[Opacity]]``, a boolean.
+  - ``[[ArrayDesignator]]``, either ``undefined`` or a _TypeDesignator_.
 Type designators represent a shape of typed object. Identical typed objects have identical type designator.
 
 Every ground and struct type object is its own type designator.
@@ -28,57 +29,57 @@ All array type objects with the same element type share their type designator.
   
 
 ## Type Objects
-_Type object_ is an exotic object, constructable with a type object constructor (StructType or ArrayType). 
+_TypeObject_ is an exotic object, constructable with a type object constructor (StructType or ArrayType). 
 
 Every type object carries the following internal slots:
-  - [[Structure]] 
-  - \[\[Dimensions]]
-  - \[\[Opacity]]
+  - ``[[Structure]]``
+  - ``[[Dimensions]]``
+  - ``[[Opacity]]``
 
-Type objects are subdivided into
-  - Ground type objects
-  - Struct type objects
-  - Array type objects
-Ground type objects and struct type objects are also _type designators_ and carry all internal slots for type designators. Their [[Rank]] is 0 and their [[Dimensions]] is an empty list.
+_TypeObject_s are subdivided into
+  - _GroundTypeObject_s
+  - _StructTypeObject_s
+  - _ArrayTypeObject_s
+Ground type objects and struct type objects are also _TypeDesignators_ and carry all internal slots for type designators. Their ``[[Rank]]`` is 0 and their ``[[Dimensions]]`` is an empty list.
 
 
-### Ground type objects
+### GroundTypeObjects
 
-Groud type objects are also type designators.
-Their [[Rank]] is 0, their [[Dimensions]] is an empty list, and their [[Structure]] is a ground structure.
+_GroundTypeObject_s are also _TypeDesignator_s.
+Their ``[[Rank]]`` is 0, their ``[[Dimensions]]`` is an empty list, and their ``[[Structure]]`` is a ground structure.
 
 They are also type objects and available to ECMAScript programs under the following names:
-  - ``uint8``: [[Structure]]: ``uint8``, [[Opacity]]: *false*.
-  - ``int8``: [[Structure]]: ``int8``, [[Opacity]]: *false*.
-  - ``uint16``: [[Structure]]: ``uint16``, [[Opacity]]: *false*.
-  - ``int16``: [[Structure]]: ``int16``, [[Opacity]]: *false*.
-  - ``uint32``: [[Structure]]: ``uint32``, [[Opacity]]: *false*.
-  - ``int32``: [[Structure]]: ``int32``, [[Opacity]]: *false*.
-  - ``float32``: [[Structure]]: ``float32``, [[Opacity]]: *false*.
-  - ``float64``: [[Structure]]: ``float64``, [[Opacity]]: *false*.
-  - ``any``: [[Structure]]: ``any``, [[Opacity]]: *true*.
-  - ``string``: [[Structure]]: ``string``, [[Opacity]]: *true*.
-  - ``object``: [[Structure]]: ``object``, [[Opacity]]: *true*.
+  - ``uint8``: ``[[Structure]]``: ``uint8``, ``[[Opacity]]``: *false*.
+  - ``int8``: ``[[Structure]]``: ``int8``, ``[[Opacity]]``: *false*.
+  - ``uint16``: ``[[Structure]]``: ``uint16``, ``[[Opacity]]``: *false*.
+  - ``int16``: ``[[Structure]]``: ``int16``, ``[[Opacity]]``: *false*.
+  - ``uint32``: ``[[Structure]]``: ``uint32``, ``[[Opacity]]``: *false*.
+  - ``int32``: ``[[Structure]]``: ``int32``, ``[[Opacity]]``: *false*.
+  - ``float32``: ``[[Structure]]``: ``float32``, ``[[Opacity]]``: *false*.
+  - ``float64``: ``[[Structure]]``: ``float64``, ``[[Opacity]]``: *false*.
+  - ``any``: ``[[Structure]]``: ``any``, ``[[Opacity]]``: *true*.
+  - ``string``: ``[[Structure]]``: ``string``, ``[[Opacity]]``: *true*.
+  - ``object``: ``[[Structure]]``: ``object``, ``[[Opacity]]``: *true*.
 
 
 ### Struct type objects
 
 Struct type objects are also type designators.
-Their [[Rank]] is 0, their [[Dimensions]] is an empty list, and their [[Structure]] is a non-ground structure.
+Their ``[[Rank]]`` is 0, their ``[[Dimensions]]`` is an empty list, and their ``[[Structure]]`` is a non-ground structure.
 
 ### Array type objects
 
 Array type objects are type objects representing fixed-size arrays of typed objects.
-For them, [[Rank]] = length([[Dimensions]]).
+For them, ``[[Rank]] = length([[Dimensions]])``.
 
 Array type objects carry additional internal property:
-  - [[TypeDesignator]]. Its value is a _TypeDesignator_.
+  - ``[[TypeDesignator]]``. Its value is a _TypeDesignator_.
 
 
   
-### \[\[Call]] for Type Objects  
+### ``[[Call]]`` for Type Objects  
 
-Type objects have a \[\[Call]] internal method defined. Its behaviour is specified below.
+Type objects have a ``[[Call]]`` internal method defined. Its behaviour is specified below.
   
 
 ### TypeObject(obj)
@@ -89,14 +90,16 @@ Type objects have a \[\[Call]] internal method defined. Its behaviour is specifi
 
 ## Typed Object
 _Typed objects_ are exotic objects that are created from Type Objects. They carry the following internal slots:
-  - [[TypeDesignator]]: the values should be a type designator
-  - [[Dimensions]]: number of elements in dimensions should be equal to the rank of type designator.
-  - [[ViewedArrayBuffer]] 
-  - [[ByteOffset]]
-  - [[Opacity]]
+  - ``[[TypeDesignator]]``: the values should be a type designator
+  - ``[[Dimensions]]``: number of elements in dimensions should be equal to the rank of type designator.
+  - ``[[ViewedArrayBuffer]]``
+  - ``[[ByteOffset]]``
+  - ``[[Opacity]]``
 
-### \[\[GetOwnProperty]] (P) on typed object
-When the [[GetOwnProperty]] internal method of an exotic typed object O is called with property key P the following steps are taken:
+### ``[[GetOwnProperty]]`` (P) on typed object
+When the ``[[GetOwnProperty]]`` internal method of an exotic typed object O is called with property key P the following steps are taken:
+
+TODO: Arrays
 
 1. Let s be a result of Structure(O).
 1. Let field record r be a field record with name P from s
@@ -107,35 +110,35 @@ When the [[GetOwnProperty]] internal method of an exotic typed object O is calle
 
 
 
-### \[\[GetPrototypeOf]]()
+### ``[[GetPrototypeOf]]``()
 
-When [[GetPrototypeOf]] is called on typed object _O_, the following steps are taken:
+When ``[[GetPrototypeOf]]`` is called on typed object _O_, the following steps are taken:
 
-1. Let _typeDesignator_ be a value of _O_'s [[TypeDesignator]] internal slot.
+1. Let _typeDesignator_ be a value of _O_'s ``[[TypeDesignator]]`` internal slot.
 2. Let _proto_ be a result of Get(_typeDesignator_, "prototype").
 3. Return _proto_
 
 
-### \[\[IsExtensible]]()
+### ``[[IsExtensible]]``()
 
-[[IsExtensible]] for typed object _O_ returns *false*.
+``[[IsExtensible]]`` for typed object _O_ returns *false*.
 
 
-### \[\[Structure]](O)
+### ``[[Structure]]``(O)
 
 For exotic typed object O:
 
-1. Let _typeDesignator_ be a value of [[TypeDesignator]] internal slot of _O_.
-2. Return a value of [[Structure]] internal slot of _typeDesignator_.
+1. Let _typeDesignator_ be a value of ``[[TypeDesignator]]`` internal slot of _O_.
+2. Return a value of ``[[Structure]]`` internal slot of _typeDesignator_.
 
 ### SameValue, SameValueZero and === algorithm on typed objects
 
 All three algorithms are modified in the same way:
   - If _x_ and _y_ are typed objects
       * Return true if the following holds:
-         1. values of interna.l slots [[TypeObject]], [[ViewedArrayBuffer]], [[ByteOffset]] and 
-            [[Opacity]] are SameValue respectively.
-         2. Values of internal slot [[Dimensions]] of _x_ and _y_ are identical lists of numbers.
+         1. values of internal slots ``[[TypeDesignator]]``, ``[[ViewedArrayBuffer]]``, ``[[ByteOffset]]`` and 
+            ``[[Opacity]]`` are SameValue respectively.
+         2. Values of internal slot ``[[Dimensions]]`` of _x_ and _y_ are identical lists of numbers.
       * Return false otherwise.
 
 
@@ -149,13 +152,15 @@ The StructType object is a constructor-like function that creates type objects.
 
 StructType called with _object_ argument performs the following steps:
 
+TODO: Opaque structures
+
 1. Assert: Type\(_object_) is Object.
 1. Let _O_ be *this* value.
-1. If _O_ does not have \[\[Structure\]\] or \[\[Size\]\] internal slots, throw *TypeError*.
+1. If _O_ does not have ``[[Structure]]`` internal slots, throw *TypeError*. (TODO check other slots)
 1. Let _currentOffset_ be zero.
 1. Let _structure_ be an empty list.
 1. For each own property key _P_ of _object_, iterated in the standard own property iteration order:
-    1. Let _fieldType_ be a result of internal operation \[\]\[Get]](_P_, _O_) on object _O_.
+    1. Let _fieldType_ be a result of internal operation Get(_P_, _O_) on object _O_.
     1. If _fieldType_ is not a type object, throw _TypeError_.
     1. Let _alignment_ be a result of Alignment\(_fieldType_).
     1. Set _currentOffset_ to a minimal integer equal to or greater than _currentOffset_ that 
@@ -167,15 +172,16 @@ StructType called with _object_ argument performs the following steps:
     1. ReturnIfAbrupt\(_s_\).
     1. Set _currentOffset_ to _currentOffset_ + _s_. 
 1. Let _size_ be _currentOffset_.
-1. Set _O_'s \[\[Structure\]\] to _structure_.
-1. Set _O_'s \[\[Rank\]\] to 0.
-1. Set _O_'s \[\[Opacity\]\] to Opaque(_structure_).
+1. Set _O_'s ``[[Structure]]`` to _structure_.
+1. Set _O_'s ``[[Rank]]`` to 0.
+1. Set _O_'s ``[[Opacity]]`` to Opaque(_structure_).
 1. Return _O_.
 
 
 ### StructType.prototype.Array(N)
 
 TODO: convert N to integer number properly.
+TODO: rewrite
 
 1. Let _O_ be *this* value.
 2. Let _structure_ be _O_'s \[\[Structure]].
@@ -196,34 +202,34 @@ TODO: A copy of *this* with \[\[Opacity\]] set to *false* if it is true, *this* 
 
 # Abstract Operations
 
+## TypeDesignator(typeObject)
+
+1. If _typeObject_ has a ``[[TypeDesignator]]`` internal slot, return its value.
+2. Otherwise return _typeObject_.
+
 ## Alignment(typeDesignator)
 
-1. If _typeDesignator_ is one of the ground type designators return \[\[Size\]\](typeObject).
-1. Let _S_ be a value of _typeDesignator_'s \[\[Structure\]\] internal slot.
-1. Return a maximum of Alignment(_t_) where _t_ goes over values of _fieldType_ properties of field records in _S_. 
+1. Let _S_ be a value of _typeDesignator_'s `[[Structure]]`` internal slot.
+2. If _S_ is a ground structure, return Size(_S_). TODO: opaque
+1. Otherwise, return a maximum of Alignment(TypeDesignator(_t_)) where _t_ goes over values of _fieldType_ properties of field records in _S_. 
 
-## Size(typeDesignator)
+## Size(structure)
 
-1. If _typeDesignator_ is one of the ground type objects return:
+1. If _struxture_ is one of the ground type objects return:
    1. 1 for *uint8*, *int8*.
    1. 2 for *uint16*, *int16*.
    1. 4 for *uint32*, *int32*, *float32*.
    1. 8 for *float64*.
-1. Let _structure_ be Structure(_typeDesignator_).
-2. Return Size(_structure_)
-
-
-## Size(structure)
-
-1. Let _currentOffset_ be zero.
-1. For each field record _r_ in _structure_:
-    1. Let _fieldType_ be _r_._fieldType_.
-    1. Let _alignment_ be a result of Alignment\(_fieldType_).
-    1. Set _currentOffset_ to a minimal integer equal to or greater than _currentOffset_ that 
-       is evenly divisible by _alignment_.
-    1. Let _s_ be Size\(_fieldType_\).
-    1. Set _currentOffset_ to _currentOffset_ + _s_. 
-1. Return _currentOffset_.
+1. Otherwise:
+    1. Let _currentOffset_ be zero.
+    1. For each field record _r_ in _structure_:
+        1. Let _fieldType_ be _r_._fieldType_.
+        1. Let _alignment_ be a result of Alignment\(_fieldType_).
+        1. Set _currentOffset_ to a minimal integer equal to or greater than _currentOffset_ that 
+           is evenly divisible by _alignment_.
+        1. Let _s_ be Size\(_fieldType_\).
+        1. Set _currentOffset_ to _currentOffset_ + _s_. 
+    1. Return _currentOffset_.
 
 
 ## Size(_structure_, _dimensions_)
