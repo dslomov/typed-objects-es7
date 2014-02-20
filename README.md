@@ -6,7 +6,6 @@ _Structure_: either
   - one of ``uint8``, ``int8``, ``uint16``, ``int16``, ``uint32``, ``int32``, ``float32``, ``float64``, 
     ``any``, ``string``, ``object`` (_ground structures_)
   - an ordered list of _FieldRecord_s.
-  -
 
 _FieldRecord_: a triple of {``name`` : property name, ``byteOffset`` : integer, ``type`` : _TypeObject_ }. 
 
@@ -21,9 +20,11 @@ Type designators carry the following internal slots:
   - ``[[Rank]]``, an integer.
   - ``[[Opacity]]``, a boolean.
   - ``[[ArrayDesignator]]``, either ``undefined`` or a _TypeDesignator_.
+
 Type designators represent a shape of typed object. Identical typed objects have identical type designator.
 
 Every ground and struct type object is its own type designator.
+
 All array type objects with the same element type share their type designator.
 
   
@@ -40,13 +41,17 @@ _TypeObject_s are subdivided into
   - _GroundTypeObject_s
   - _StructTypeObject_s
   - _ArrayTypeObject_s
-Ground type objects and struct type objects are also _TypeDesignators_ and carry all internal slots for type designators. Their ``[[Rank]]`` is 0 and their ``[[Dimensions]]`` is an empty list.
+
+Ground type objects and struct type objects are also _TypeDesignator_s and carry all internal slots for type designators. Their ``[[Rank]]`` is 0 and their ``[[Dimensions]]`` is an empty list.
 
 
 ### GroundTypeObjects
 
 _GroundTypeObject_s are also _TypeDesignator_s.
-Their ``[[Rank]]`` is 0, their ``[[Dimensions]]`` is an empty list, and their ``[[Structure]]`` is a ground structure.
+
+   - Their ``[[Rank]]`` is 0.
+   - Their ``[[Dimensions]]`` is an empty list. 
+   - Their ``[[Structure]]`` is a ground structure.
 
 They are also type objects and available to ECMAScript programs under the following names:
   - ``uint8``: ``[[Structure]]``: ``uint8``, ``[[Opacity]]``: *false*.
@@ -65,7 +70,9 @@ They are also type objects and available to ECMAScript programs under the follow
 ### StructTypeObjects
 
 Struct type objects are also type designators.
-Their ``[[Rank]]`` is 0, their ``[[Dimensions]]`` is an empty list, and their ``[[Structure]]`` is a non-ground structure.
+  - Their ``[[Rank]]`` is 0
+  - Their ``[[Dimensions]]`` is an empty list
+  - Their ``[[Structure]]`` is a non-ground structure.
 
 ### ArrayTypeObjects
 
