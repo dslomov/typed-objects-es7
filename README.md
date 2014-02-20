@@ -144,13 +144,13 @@ All three algorithms are modified in the same way:
 
 # Type Object Constructors
 
-## StructType
+## ``StructType``
 
-The StructType object is a constructor-like function that creates type objects. 
+The ``StructType`` object is a constructor-like function that creates type objects. 
 
-### StructType(object)
+### ``StructType``(object)
 
-StructType called with _object_ argument performs the following steps:
+``StructType`` called with _object_ argument performs the following steps:
 
 TODO: Opaque structures
 
@@ -178,7 +178,7 @@ TODO: Opaque structures
 1. Return _O_.
 
 
-### StructType.prototype.ArrayType(N)
+### ``StructType.prototype.ArrayType``(N)
 
 TODO: convert N to integer number properly.
 
@@ -191,12 +191,12 @@ TODO: convert N to integer number properly.
 5. Create a new _ArrayTypeObject_ _result_. TODO.
 6. Set _result_'s ``[[Structure]]`` to _structure_.
 7. Let _newDimesions_ be a result of appending _N_ to _dimensions_.
-8. Set _result_'s ``[[Dimensions]] to _newDimensions_.
+8. Set _result_'s ``[[Dimensions]]`` to _newDimensions_.
 7. Set _result_'s ``[[Opacity]]`` to _opacity_.
 6. Set _result_'s ``[[TypeDesignator]]`` to _arrayDesignator_.
 8. Return _result_.
 
-### StructType.prototype.OpaqueType
+### ``StructType.prototype.OpaqueType``
 
 TODO: A copy of *this* with \[\[Opacity\]] set to *false* if it is true, *this* otherwise.
 
