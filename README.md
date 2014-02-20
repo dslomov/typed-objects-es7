@@ -62,19 +62,18 @@ They are also type objects and available to ECMAScript programs under the follow
   - ``object``: ``[[Structure]]``: ``object``, ``[[Opacity]]``: *true*.
 
 
-### Struct type objects
+### StructTypeObjects
 
 Struct type objects are also type designators.
 Their ``[[Rank]]`` is 0, their ``[[Dimensions]]`` is an empty list, and their ``[[Structure]]`` is a non-ground structure.
 
-### Array type objects
+### ArrayTypeObjects
 
-Array type objects are type objects representing fixed-size arrays of typed objects.
+_ArrayTypeObject_s are type objects representing fixed-size arrays of typed objects.
 For them, ``[[Rank]] = length([[Dimensions]])``.
 
-Array type objects carry additional internal property:
+_ArrayTypeObject_s carry additional internal slot:
   - ``[[TypeDesignator]]``. Its value is a _TypeDesignator_.
-
 
   
 ### ``[[Call]]`` for Type Objects  
@@ -89,6 +88,7 @@ Type objects have a ``[[Call]]`` internal method defined. Its behaviour is speci
 
 
 ## Typed Object
+
 _Typed objects_ are exotic objects that are created from Type Objects. They carry the following internal slots:
   - ``[[TypeDesignator]]``: the values should be a type designator
   - ``[[Dimensions]]``: number of elements in dimensions should be equal to the rank of type designator.
@@ -178,24 +178,25 @@ TODO: Opaque structures
 1. Return _O_.
 
 
-### StructType.prototype.Array(N)
+### StructType.prototype.ArrayType(N)
 
 TODO: convert N to integer number properly.
-TODO: rewrite
 
 1. Let _O_ be *this* value.
-2. Let _structure_ be _O_'s \[\[Structure]].
-3. Let _dimensions_ be _O_'s \[\[Dimensions\]\].
-4. Let _opacity_ be _O_'s \[\[Opacity\]\].
-5. Create a new type object _Result_.
-6. TODO: Set _Result_'s [[Prototype]] to the right thing, including caching.
-6. Set _Result_'s \[\[Structure]] to _structure_.
+2. Let _structure_ be _O_'s ``[[Structure]]``.
+3. Let _dimensions_ be _O_'s ``[[Dimensions]]``.
+4. Let _opacity_ be _O_'s ``[[Opacity]]``.
+5. Let _typeDesignator_ be TypeDesignator(_O_).
+5. Let _arrayDesignator_ be GetOrCreateArrayTypeDesignator(_typeDesignator_)/
+5. Create a new _ArrayTypeObject_ _result_. TODO.
+6. Set _result_'s ``[[Structure]]`` to _structure_.
 7. Let _newDimesions_ be a result of appending _N_ to _dimensions_.
-8. Set _Result_'s \[\[Dimensions\]\] to _newDimensions_.
-7. Set _Result_'s \[\[Opacity\]\] to _opacity_.
-8. Return _Result_.
+8. Set _result_'s ``[[Dimensions]] to _newDimensions_.
+7. Set _result_'s ``[[Opacity]]`` to _opacity_.
+6. Set _result_'s ``[[TypeDesignator]]`` to _arrayDesignator_.
+8. Return _result_.
 
-### StructType.prototype.Opacity
+### StructType.prototype.OpaqueType
 
 TODO: A copy of *this* with \[\[Opacity\]] set to *false* if it is true, *this* otherwise.
 
@@ -230,7 +231,26 @@ TODO: A copy of *this* with \[\[Opacity\]] set to *false* if it is true, *this* 
         1. Let _s_ be Size\(_fieldType_\).
         1. Set _currentOffset_ to _currentOffset_ + _s_. 
     1. Return _currentOffset_.
+  
+## CreateArrayTypeDesignator(_typeDesignator_)
 
+Creates a new type designator that designates an array with elements of type designated by _typeDesignator_.
+
+1. Let _result_ be a new _TypeDesignator_ TODO: proper spec
+2. Set _result_'s ``[[Structure]]`` to _typeDesignator_'s ``[[Structure]]``.
+3. Set _result_'s ``[[Rank]]`` to _typeDesignator_'s ``Rank`` + 1
+4. Set _result_'s ``[[Opacity]]`` to _typeDesignator_'s ``[[Opacity]]`.
+5. Set _result_'s ``[[ArrayDesignator]]`` to ``undeifined``.
+6. Return _result_.
+7. 
+
+## GetOrCreateArrayTypeDesignator(_typeDesignator_)
+
+1. Let _cached_ be _typeDesignator_'s ``[[ArrayDesignator]]``.
+2. If _cached_ is not ``undefined``, return _cached_.
+3. Let _result_ be CreateArrayTypeDesignator(_typeDesignator_).
+4. Set ``[[ArrayDesignator]]`` of _typeDesignator_ to _result_.
+5. Return _result_.
 
 ## Size(_structure_, _dimensions_)
 
