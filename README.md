@@ -2,26 +2,29 @@
 
 ## Overview
 
-_Structure_: a list of field records. Every field record is a triple {_name_ : property name, _byteOffset_ : integer, _type_ : fieldType}. 
+``Structure``: either
+  - one of ``uint8``, ``int8``, ``uint16``, ``int16``, ``uint32``, ``int32``, ``float32``, ``float64``, 
+    ``any``, ``string``, ``object`` (_ground structures_)
+  - an ordered list of ``fieldRecord``
+  - 
+``FieldRecord``: a triple of {_name_ : property name, _byteOffset_ : integer, _type_ : ``TypeObject`` }. 
 
 _Dimensions_: A list of integers (positive).
 
-_fieldType_ is either a value type or an ECMAScript object, required to be a _type object_.
-
-value types: uint8, int8, uint16, int16, uint32, int32, float32, float64, any, string, object
-
 ## Type Designators
 
-_Type designator_ is an exotic object that represents a shape of a typed object. 
+``TypeDesignator`` is an exotic object that represents a shape of a typed object. 
 
-Type desgnators carry the following internal slots:
-  - [[Structure]], should have a structure value.
+Type designators carry the following internal slots:
+  - [[Structure]], should have a ``Structure`` value.
   - [[Rank]], an integer.
   - [[Opacity]], a boolean.
+  - [[ArrayDesignator]], either ``undefined`` or a _TypeDesignator_.
 Type designators represent a shape of typed object. Identical typed objects have identical type designator.
 
-Every struct type object is its own type designator.
+Every ground and struct type object is its own type designator.
 All array type objects with the same element type share their type designator.
+
   
 
 ## Type Objects
@@ -32,20 +35,62 @@ Every type object carries the following internal slots:
   - \[\[Dimensions]]
   - \[\[Opacity]]
 
+Type objects are subdivided into
+  - Ground type objects
+  - Struct type objects
+  - Array type objects
+Ground type objects and struct type objects are also _type designators_ and carry all internal slots for type designators. Their [[Rank]] is 0 and their [[Dimensions]] is an empty list.
+
+
+### Ground type objects
+
+Groud type objects are also type designators.
+Their [[Rank]] is 0, their [[Dimensions]] is an empty list, and their [[Structure]] is a ground structure.
+
+They are also type objects and available to ECMAScript programs under the following names:
+  - ``uint8``: [[Structure]]: ``uint8``, [[Opacity]]: *false*.
+  - ``int8``: [[Structure]]: ``int8``, [[Opacity]]: *false*.
+  - ``uint16``: [[Structure]]: ``uint16``, [[Opacity]]: *false*.
+  - ``int16``: [[Structure]]: ``int16``, [[Opacity]]: *false*.
+  - ``uint32``: [[Structure]]: ``uint32``, [[Opacity]]: *false*.
+  - ``int32``: [[Structure]]: ``int32``, [[Opacity]]: *false*.
+  - ``float32``: [[Structure]]: ``float32``, [[Opacity]]: *false*.
+  - ``float64``: [[Structure]]: ``float64``, [[Opacity]]: *false*.
+  - ``any``: [[Structure]]: ``any``, [[Opacity]]: *true*.
+  - ``string``: [[Structure]]: ``string``, [[Opacity]]: *true*.
+  - ``object``: [[Structure]]: ``object``, [[Opacity]]: *true*.
+
+
+### Struct type objects
+
+Struct type objects are also type designators.
+Their [[Rank]] is 0, their [[Dimensions]] is an empty list, and their [[Structure]] is a non-ground structure.
+
+### Array type objects
+
+Array type objects are type objects representing fixed-size arrays of typed objects.
+For them, [[Rank]] = length([[Dimensions]]).
+
+Array type objects carry additional internal property:
+  - [[TypeDesignator]]. Its value is a _TypeDesignator_.
+
+
+  
+### \[\[Call]] for Type Objects  
+
 Type objects have a \[\[Call]] internal method defined. Its behaviour is specified below.
   
 
-### TypeObject(obj) constructor
+### TypeObject(obj)
 
-### TypeObject(arrayBuffer\[, byteOffset\]) constructor 
+### TypeObject(arrayBuffer\[, byteOffset\])
 
-### Ground type objects
 
 
 ## Typed Object
 _Typed objects_ are exotic objects that are created from Type Objects. They carry the following internal slots:
-  - [[TypeDesignator]] 
-  - [[Dimensions]] - number of elements in dimensions should be equal to the rank of type designator.
+  - [[TypeDesignator]]: the values should be a type designator
+  - [[Dimensions]]: number of elements in dimensions should be equal to the rank of type designator.
   - [[ViewedArrayBuffer]] 
   - [[ByteOffset]]
   - [[Opacity]]
@@ -80,7 +125,7 @@ When [[GetPrototypeOf]] is called on typed object _O_, the following steps are t
 
 For exotic typed object O:
 
-1. Let _typeDesignator_ be a value of [[TypeObject]] internal slot of _O_.
+1. Let _typeDesignator_ be a value of [[TypeDesignator]] internal slot of _O_.
 2. Return a value of [[Structure]] internal slot of _typeDesignator_.
 
 ### SameValue, SameValueZero and === algorithm on typed objects
