@@ -11,21 +11,42 @@ _FieldRecord_: a triple of {``name`` : property name, ``byteOffset`` : integer, 
 
 _Dimensions_: A list of integers (positive).
 
-## Type Designators
+## Type Descriptors
 
-_TypeDesignator_ is an exotic object that represents a shape of a typed object. 
+_TypeDescriptor_ is an exotic object that represents a shape of a typed object. 
 
-Type designators carry the following internal slots:
+Type descriptors carry the following internal slots:
   - ``[[Structure]]``, should have a _Structure_ value.
   - ``[[Rank]]``, an integer.
   - ``[[Opacity]]``, a boolean.
-  - ``[[ArrayDesignator]]``, either ``undefined`` or a _TypeDesignator_.
+  - ``[[ArrayDescriptor]]``, either ``undefined`` or a _TypeDescriptor_.
+  - ``[[OpaqueDescriptor]]``, either ``undefined`` or a _TypeDescriptor_.
 
-Type designators represent a shape of typed object. Identical typed objects have identical type designator.
+Type descriptors represent a shape of typed object. Identical typed objects have identical type descriptor. Type descriptors act as prototypes of typed objects.
 
-Every ground and struct type object is its own type designator.
+All array type objects with the same element type share their type descriptor.
 
-All array type objects with the same element type share their type designator.
+
+### Ground Type Descriptors
+
+There is a fixed set of _ground type descriptors_. Their ``[[Structure]]``s are gorund structures/
+
+All ground type descriptors are have ``[[Rank]]`` equal to 0.
+Their ``[[ArrayDescriptor]]`` and ``[[OpaqueDescriptor]]`` internal slots are initially ``undefined``.
+
+Their other properties are as follows:
+
+  - ``[[uint8]]``: ``[[Structure]]``: ``uint8``, ``[[Opacity]]``: *false*.
+  - ``[[int8]]``: ``[[Structure]]``: ``int8``, ``[[Opacity]]``: *false*.
+  - ``[[uint16]]``: ``[[Structure]]``: ``uint16``, ``[[Opacity]]``: *false*.
+  - ``[[int16]]``: ``[[Structure]]``: ``int16``, ``[[Opacity]]``: *false*.
+  - ``[[uint32]]``: ``[[Structure]]``: ``uint32``, ``[[Opacity]]``: *false*.
+  - ``[[int32]]``: ``[[Structure]]``: ``int32``, ``[[Opacity]]``: *false*.
+  - ``[[float32]]``: ``[[Structure]]``: ``float32``, ``[[Opacity]]``: *false*.
+  - ``[[float64]]``: ``[[Structure]]``: ``float64``, ``[[Opacity]]``: *false*.
+  - ``[[any]]``: ``[[Structure]]``: ``any``, ``[[Opacity]]``: *true*.
+  - ``[[string]]``: ``[[Structure]]``: ``string``, ``[[Opacity]]``: *true*.
+  - ``[[object]]``: ``[[Structure]]``: ``object``, ``[[Opacity]]``: *true*.
 
   
 
@@ -33,54 +54,19 @@ All array type objects with the same element type share their type designator.
 _TypeObject_ is an exotic object, constructable with a type object constructor (StructType or ArrayType). 
 
 Every type object carries the following internal slots:
-  - ``[[Structure]]``
+  - ``[[TypeDescriptor]]``
   - ``[[Dimensions]]``
-  - ``[[Opacity]]``
 
-_TypeObject_s are subdivided into
-  - _GroundTypeObject_s
-  - _StructTypeObject_s
-  - _ArrayTypeObject_s
+For every tpe object, ``length([[Dimensions]]) == [[Rank]] of [[TypeDescriptor]]``.
 
-Ground type objects and struct type objects are also _TypeDesignator_s and carry all internal slots for type designators. Their ``[[Rank]]`` is 0 and their ``[[Dimensions]]`` is an empty list.
+### Ground type objects
 
+The following type objects with ``[[TypeDescriptor]]``s being ground type descriptor ara available to ECMAScript programs
+under the following names:
 
-### GroundTypeObjects
+  - ``${NAME}`` : ``[[TypeDescriptor]]`` : ``[[${NAME}]]``. TODO nice list
 
-_GroundTypeObject_s are also _TypeDesignator_s.
-
-   - Their ``[[Rank]]`` is 0.
-   - Their ``[[Dimensions]]`` is an empty list. 
-   - Their ``[[Structure]]`` is a ground structure.
-
-They are also type objects and available to ECMAScript programs under the following names:
-  - ``uint8``: ``[[Structure]]``: ``uint8``, ``[[Opacity]]``: *false*.
-  - ``int8``: ``[[Structure]]``: ``int8``, ``[[Opacity]]``: *false*.
-  - ``uint16``: ``[[Structure]]``: ``uint16``, ``[[Opacity]]``: *false*.
-  - ``int16``: ``[[Structure]]``: ``int16``, ``[[Opacity]]``: *false*.
-  - ``uint32``: ``[[Structure]]``: ``uint32``, ``[[Opacity]]``: *false*.
-  - ``int32``: ``[[Structure]]``: ``int32``, ``[[Opacity]]``: *false*.
-  - ``float32``: ``[[Structure]]``: ``float32``, ``[[Opacity]]``: *false*.
-  - ``float64``: ``[[Structure]]``: ``float64``, ``[[Opacity]]``: *false*.
-  - ``any``: ``[[Structure]]``: ``any``, ``[[Opacity]]``: *true*.
-  - ``string``: ``[[Structure]]``: ``string``, ``[[Opacity]]``: *true*.
-  - ``object``: ``[[Structure]]``: ``object``, ``[[Opacity]]``: *true*.
-
-
-### StructTypeObjects
-
-Struct type objects are also type designators.
-  - Their ``[[Rank]]`` is 0
-  - Their ``[[Dimensions]]`` is an empty list
-  - Their ``[[Structure]]`` is a non-ground structure.
-
-### ArrayTypeObjects
-
-_ArrayTypeObject_s are type objects representing fixed-size arrays of typed objects.
-For them, ``[[Rank]] = length([[Dimensions]])``.
-
-_ArrayTypeObject_s carry additional internal slot:
-  - ``[[TypeDesignator]]``. Its value is a _TypeDesignator_.
+Their ``[[Dimensions]]`` is an empty list, as required by the above invariant.
 
   
 ### ``[[Call]]`` for Type Objects  
@@ -97,8 +83,8 @@ Type objects have a ``[[Call]]`` internal method defined. Its behaviour is speci
 ## Typed Object
 
 _Typed objects_ are exotic objects that are created from Type Objects. They carry the following internal slots:
-  - ``[[TypeDesignator]]``: the values should be a type designator
-  - ``[[Dimensions]]``: number of elements in dimensions should be equal to the rank of type designator.
+  - ``[[TypeDescriptor]]``: the values should be a type descriptor
+  - ``[[Dimensions]]``: number of elements in dimensions should be equal to the rank of type descriptor.
   - ``[[ViewedArrayBuffer]]``
   - ``[[ByteOffset]]``
   - ``[[Opacity]]``
@@ -121,9 +107,8 @@ TODO: Arrays
 
 When ``[[GetPrototypeOf]]`` is called on typed object _O_, the following steps are taken:
 
-1. Let _typeDesignator_ be a value of _O_'s ``[[TypeDesignator]]`` internal slot.
-2. Let _proto_ be a result of Get(_typeDesignator_, "prototype").
-3. Return _proto_
+1. Let _typeDescriptor_ be a value of _O_'s ``[[TypeDescriptor]]`` internal slot.
+3. Return _typeDescriptor_
 
 
 ### ``[[IsExtensible]]``()
@@ -135,15 +120,15 @@ When ``[[GetPrototypeOf]]`` is called on typed object _O_, the following steps a
 
 For exotic typed object O:
 
-1. Let _typeDesignator_ be a value of ``[[TypeDesignator]]`` internal slot of _O_.
-2. Return a value of ``[[Structure]]`` internal slot of _typeDesignator_.
+1. Let _typeDescriptor_ be a value of ``[[TypeDescriptor]]`` internal slot of _O_.
+2. Return a value of ``[[Structure]]`` internal slot of _typeDescriptor_.
 
 ### SameValue, SameValueZero and === algorithm on typed objects
 
 All three algorithms are modified in the same way:
   - If _x_ and _y_ are typed objects
       * Return true if the following holds:
-         1. values of internal slots ``[[TypeDesignator]]``, ``[[ViewedArrayBuffer]]``, ``[[ByteOffset]]`` and 
+         1. values of internal slots ``[[TypeDescriptor]]``, ``[[ViewedArrayBuffer]]``, ``[[ByteOffset]]`` and 
             ``[[Opacity]]`` are SameValue respectively.
          2. Values of internal slot ``[[Dimensions]]`` of _x_ and _y_ are identical lists of numbers.
       * Return false otherwise.
@@ -163,7 +148,7 @@ TODO: Opaque structures
 
 1. Assert: Type\(_object_) is Object.
 1. Let _O_ be *this* value.
-1. If _O_ does not have ``[[Structure]]`` internal slots, throw *TypeError*. (TODO check other slots)
+1. If _O_ does not have ``[[TypeDescriptor]]`` internal slots, throw *TypeError*. (TODO check other slots)
 1. Let _currentOffset_ be zero.
 1. Let _structure_ be an empty list.
 1. For each own property key _P_ of _object_, iterated in the standard own property iteration order:
@@ -179,51 +164,45 @@ TODO: Opaque structures
     1. ReturnIfAbrupt\(_s_\).
     1. Set _currentOffset_ to _currentOffset_ + _s_. 
 1. Let _size_ be _currentOffset_.
-1. Set _O_'s ``[[Structure]]`` to _structure_.
-1. Set _O_'s ``[[Rank]]`` to 0.
-1. Set _O_'s ``[[Opacity]]`` to Opaque(_structure_).
+1. Let _typeDescriptor_ be CreateStructTypeDescriptor(_structure_).
+1. Set _O_'s ``[[TypeDescriptor]]`` to _typeDescriptor_.
+1. Set _O_'s ``prototype`` property to _typeDescriptor_.
+1. Make _O_'s ``prototype`` property *read-only* and *non-configurable*.
 1. Return _O_.
-
 
 ### ``StructType.prototype.ArrayType``(N)
 
 TODO: convert N to integer number properly.
 
 1. Let _O_ be *this* value.
-2. Let _structure_ be _O_'s ``[[Structure]]``.
+1. Let _typeDescriptor_ be a value of _O_'s ``[[TypeDescriptor]]`` internal slot.
+2. Let _structure_ be _ownTypeDescriptor_'s ``[[Structure]]``.
 3. Let _dimensions_ be _O_'s ``[[Dimensions]]``.
-4. Let _opacity_ be _O_'s ``[[Opacity]]``.
-5. Let _typeDesignator_ be TypeDesignator(_O_).
-5. Let _arrayDesignator_ be GetOrCreateArrayTypeDesignator(_typeDesignator_)/
-5. Create a new _ArrayTypeObject_ _result_. TODO.
-6. Set _result_'s ``[[Structure]]`` to _structure_.
+5. Let _arrayDescriptor_ be GetOrCreateArrayTypeDescriptor(_typeDescriptor_)
+5. Create a new _TypeObject_ _result_. TODO.
+6. Set _result_'s ``[[TypeDescriptor]]`` to _arrayDescriptor_.
+6. Set _result_'s ``prototype`` to _arrayDescriptor_.
+6. Set _result_'s ``prototype`` property *read-only* and *non-configurable*.
 7. Let _newDimesions_ be a result of appending _N_ to _dimensions_.
 8. Set _result_'s ``[[Dimensions]]`` to _newDimensions_.
-7. Set _result_'s ``[[Opacity]]`` to _opacity_.
-6. Set _result_'s ``[[TypeDesignator]]`` to _arrayDesignator_.
 8. Return _result_.
 
 ### ``StructType.prototype.OpaqueType``
 
-TODO: A copy of *this* with \[\[Opacity\]] set to *false* if it is true, *this* otherwise.
+TODO: A copy of *this* with \[\[Opacity\]] set to *false* if it is true, *this* otherwise + appropriate caching.
 
 
 # Abstract Operations
 
-## TypeDesignator(typeObject)
+## Alignment(typeDescriptor)
 
-1. If _typeObject_ has a ``[[TypeDesignator]]`` internal slot, return its value.
-2. Otherwise return _typeObject_.
-
-## Alignment(typeDesignator)
-
-1. Let _S_ be a value of _typeDesignator_'s `[[Structure]]`` internal slot.
+1. Let _S_ be a value of _typeDescriptor_'s `[[Structure]]`` internal slot.
 2. If _S_ is a ground structure, return Size(_S_). TODO: opaque
-1. Otherwise, return a maximum of Alignment(TypeDesignator(_t_)) where _t_ goes over values of _fieldType_ properties of field records in _S_. 
+1. Otherwise, return a maximum of Alignment(TypeDescriptor(_t_)) where _t_ goes over values of _fieldType_ properties of field records in _S_. 
 
 ## Size(structure)
 
-1. If _struxture_ is one of the ground type objects return:
+1. If _structure_ is one of the ground type objects return:
    1. 1 for *uint8*, *int8*.
    1. 2 for *uint16*, *int16*.
    1. 4 for *uint32*, *int32*, *float32*.
@@ -238,25 +217,37 @@ TODO: A copy of *this* with \[\[Opacity\]] set to *false* if it is true, *this* 
         1. Let _s_ be Size\(_fieldType_\).
         1. Set _currentOffset_ to _currentOffset_ + _s_. 
     1. Return _currentOffset_.
+
+
+## CreateStructTypeDescriptor(_structure_)
+
+Creates a new type descriptor that describes a struct.
+
+1. Let _result_ be a new _TypeDescriptor_ TODO: proper spec
+1. Set _result_'s ``[[Structure]]`` to _structure_.
+1. Set _result_'s ``[[Rank]]`` to 0.
+1. Set _result_'s ``[[ArrayDescriptor]]`` to ``undefined``.
+1. Set _result_'s ``[[Opacity]]`` to Opaque(``structure``).
+1. Return _result_.
   
-## CreateArrayTypeDesignator(_typeDesignator_)
+## CreateArrayTypeDescriptor(_typeDescriptor_)
 
-Creates a new type designator that designates an array with elements of type designated by _typeDesignator_.
+Creates a new type descriptor that describes an array with elements of type described by _typeDescriptor_.
 
-1. Let _result_ be a new _TypeDesignator_ TODO: proper spec
-2. Set _result_'s ``[[Structure]]`` to _typeDesignator_'s ``[[Structure]]``.
-3. Set _result_'s ``[[Rank]]`` to _typeDesignator_'s ``Rank`` + 1
-4. Set _result_'s ``[[Opacity]]`` to _typeDesignator_'s ``[[Opacity]]`.
-5. Set _result_'s ``[[ArrayDesignator]]`` to ``undeifined``.
+1. Let _result_ be a new _TypeDescriptor_ TODO: proper spec
+2. Set _result_'s ``[[Structure]]`` to _typeDescriptor_'s ``[[Structure]]``.
+3. Set _result_'s ``[[Rank]]`` to _typeDescriptor_'s ``Rank`` + 1
+4. Set _result_'s ``[[Opacity]]`` to _typeDescriptor_'s ``[[Opacity]]`.
+5. Set _result_'s ``[[ArrayDescriptor]]`` to ``undeifined``.
 6. Return _result_.
 7. 
 
-## GetOrCreateArrayTypeDesignator(_typeDesignator_)
+## GetOrCreateArrayTypeDescriptor(_typeDescriptor_)
 
-1. Let _cached_ be _typeDesignator_'s ``[[ArrayDesignator]]``.
+1. Let _cached_ be _typeDescriptor_'s ``[[ArrayDescriptor]]``.
 2. If _cached_ is not ``undefined``, return _cached_.
-3. Let _result_ be CreateArrayTypeDesignator(_typeDesignator_).
-4. Set ``[[ArrayDesignator]]`` of _typeDesignator_ to _result_.
+3. Let _result_ be CreateArrayTypeDescriptor(_typeDescriptor_).
+4. Set ``[[ArrayDescriptor]]`` of _typeDescriptor_ to _result_.
 5. Return _result_.
 
 ## Size(_structure_, _dimensions_)
@@ -267,14 +258,6 @@ _structure_ is a structure and _dimensions_ is a possibly empty list of integers
 2. If _dimensions_ is an empty list, return _baseSize_.
 3. Let _count_ be a product of all integers in _dimensions_ list.
 4. Return _count_ * _baseSize_.
-
-
-## InitializeTypeObjectInternals(O, arrayBuffer, byteOffset, typeObject)
-   
-1. Set _O_'s \[\[Structure\]\] to _s_.
-1. Set _O_'s \[\[ViewedArrayBuffer\]\] to _arrayBuffer_.
-1. Set _O_'s \[\[ByteOffset\]\] to _byteOffset_.
-1. Set _O_'s \[\[TypeObject\]\] to _typeObject_.
 
 ## CreateTypedObjectFromBuffer(arrayBuffer, byteOffset, typeObject)
 
