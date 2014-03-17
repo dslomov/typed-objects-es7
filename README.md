@@ -197,7 +197,7 @@ TODO: A copy of *this* with \[\[Opacity\]] set to *false* if it is true, *this* 
 ## Alignment(typeDescriptor)
 
 1. Let _S_ be a value of _typeDescriptor_'s `[[Structure]]`` internal slot.
-2. If _S_ is a ground structure, return Size(_S_). TODO: opaque
+2. If _S_ is a ground structure, return Size(_S_).
 1. Otherwise, return a maximum of Alignment(TypeDescriptor(_t_)) where _t_ goes over values of _fieldType_ properties of field records in _S_. 
 
 ## Size(structure)
@@ -207,6 +207,7 @@ TODO: A copy of *this* with \[\[Opacity\]] set to *false* if it is true, *this* 
    1. 2 for *uint16*, *int16*.
    1. 4 for *uint32*, *int32*, *float32*.
    1. 8 for *float64*.
+   1. An implementation-defined value for *object*, *string*, or *any*
 1. Otherwise:
     1. Let _currentOffset_ be zero.
     1. For each field record _r_ in _structure_:
