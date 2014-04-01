@@ -11,9 +11,9 @@ Module (capitalized for easier search-and-replace).
 _Structure_: either
   - one of ``uint8``, ``int8``, ``uint16``, ``int16``, ``uint32``, ``int32``, ``float32``, ``float64``, 
     ``any``, ``string``, ``object`` (_ground structures_)
-  - an ordered list of _FieldRecord_s.
+  - an ordered list of _FieldRecord_.
 
-_FieldRecord_: a triple of {``name`` : property name, ``type`` : _TypeObject_ }. 
+_FieldRecord_: a pair of {``name`` : property name, ``type`` : _TypeObject_ }. 
 
 _Dimensions_: either `Nil` or `Cons(int, Dimensions)`
 
@@ -73,26 +73,27 @@ following names defined within The Module:
 
   - ``${NAME}`` : ``[[TypeDescriptor]]`` : ``[[${NAME}]]``. TODO nice list
 
-Their ``[[Dimensions]]`` is an empty list, as required by the above invariant.
+Their ``[[Dimensions]]`` are ``Nil`` as required by the above invariant.
 
 ### ``[[Call]]`` for Type Objects  
 
 Type objects have a ``[[Call]]`` internal method defined. Its behaviour is specified below:
 
-- `typeObject()` (first argument is undefined or not supplied):
-  1. If `this` is a ground type object,
-     return `Default(this.\[\[TypeDescriptor]])`
-  1. Otherwise, return `CreateTypedObject(this)`
+- _typeObject_() (first argument is undefined or not supplied):
+  1. If _typeObject_ is a ground type object,
+     1. Let _typeDescriptor_ be a value of ``[[TypeDescriptor]]`` internal slot of _typeObject_.
+     2. return Default(_typeDescriptor_)`
+  1. Otherwise, return CreateTypedObject(_typeObject_)
 
-- `typeObject(buffer[, length])` (first argument is an array buffer):
-  1. If `this` is a ground type object, throw `TypeError`
-  1. Otherwise, return `CreateTypedObjectFromBuffer(this, buffer, length)`
+- _typeObject_(buffer[, length]) (first argument is an array buffer):
+  1. If _typeObject_ is a ground type object, throw `TypeError`
+  1. Otherwise, return CreateTypedObjectFromBuffer(_typeObject_, _buffer_, _length_)
   
-- `typeObject(value)` (first argument is not undefined nor an array buffer):
-  1. If `this` is a ground type object, return `Coerce(this, value)`
+- _typeObject_(value) (first argument is not undefined nor an array buffer):
+  1. If _typeObject_ is a ground type object, return Coerce(_typeObject_, _value_)
   1. Otherwise:
-    1. Let `o` be `CreateTypedObject(this)`
-    1. Call `ConvertAndCopyTo(this.\[\[TypeDescriptor]], this.\[\[Dimensions]], o.\[\[ViewedArrayBuffer]], o.\[\[ByteOffset]], value)`
+    1. Let _o_ be CreateTypedObject(_typeObject_)
+    1. Call ConvertAndCopyTo(_typeObject_.``[[TypeDescriptor]]``, _typeObject_.``[[Dimensions]]``, _o_.``[[ViewedArrayBuffer]]``, _o_.`[[ByteOffset]]`, _value_)
 
 ## Typed Object
 
@@ -103,25 +104,25 @@ _Typed objects_ are exotic objects that are created from Type Objects. They carr
   - ``[[ByteOffset]]``
   - ``[[Opacity]]``
 
-### \[\[GetOwnProperty]] ( P )
+### ``[[GetOwnProperty]]`` ( P )
 
-When the \[\[GetOwnProperty]] internal method of a Typed Object exotic
+When the ``[[GetOwnProperty]]`` internal method of a Typed Object exotic
 object _O_ is called with property key P the following steps are
 taken:
 
-1. Let _typeDescriptor_ be the value of the \[\[TypeDescriptor]]
+1. Let _typeDescriptor_ be the value of the ``[[TypeDescriptor]]``
    internal slot of _O_.
-1. Let _dimensions_ be the value of the \[\[Dimensions]] internal slot of _O_.
-1. Let _buffer_ be the value of the \[\[ViewedArrayBuffer]] internal slot of _O_.
-1. Let _offset_ be the value of the \[\[ByteOffset]] internal slot of _O_.
-1. If _dimensions_ is Nil:
-  1. Let _s_ be value of the \[\[Structure]] internal slot from _typeDescriptor_.
+1. Let _dimensions_ be the value of the ``[[Dimensions]]`` internal slot of _O_.
+1. Let _buffer_ be the value of the ``[[ViewedArrayBuffer]]`` internal slot of _O_.
+1. Let _offset_ be the value of the ``[[ByteOffset]]`` internal slot of _O_.
+1. If _dimensions_ is ``Nil``:
+  1. Let _s_ be value of the ``[[Structure]]`` internal slot from _typeDescriptor_.
   1. Let field record _r_ be a field record with name _P_ from _s_
-  1. Return __undefined__ if _r_ does exist
+  1. Return __undefined__ if _r_ does not exist
   1. Let _o_ be OffsetOf(_s_, _P_) + _offset_
-  1. Let _value_ be Reify(_r.type.\[\[TypeDescriptor]]_, _r.type.\[\[Dimensions]]_, _buffer_, _o_)
-  1. Return a PropertyDescriptor{ \[\[Value]] : value, \[\[Enumerable]]: false,
-     \[\[Writable]]: true, \[\[Configurable]]: false }
+  1. Let _value_ be Reify(_r.type.``[[TypeDescriptor]]``, _r.type.``[[Dimensions]]``_, _buffer_, _o_)
+  1. Return a PropertyDescriptor{ ``[[Value]]`` : value, ``[[Enumerable]]``: false,
+     ``[[Writable]]``: true, ``[[Configurable]]``: false }
 1. Otherwise, assert _dimensions_` is _Cons(length, remainingDimensions)_:
   1. Set isInteger to be true if ToInteger(P) is not an abrupt
      completion, false otherwise
@@ -475,20 +476,20 @@ Where:
 ## Reify(typeDescriptor, dimensions, buffer, offset, opacity)
 
 Where:
-- `typeDescriptor` is a type descriptor
-- `dimensions` is an array of integers
-- `buffer` is an array buffer
-- `offset` is an integer
-- `value` is an arbitrary JS value
+- _typeDescriptor_ is a type descriptor
+- _dimensions_ is an array of integers
+- _buffer_ is an array buffer
+- _offset_ is an integer
+- _value_ is an arbitrary JS value
 
-1. If `dimensions` is `Cons(length, remainingDimensions)` OR
-   `typeDescriptor` is not a ground type descriptor:
+1. If _dimensions_ is `Cons(length, remainingDimensions)` OR
+   _typeDescriptor_ is not a ground type descriptor:
   1. Return a new typed object with the following properties:
-    - `\[\[TypeDescriptor]]``: `typeDescriptor`
-    - `\[\[Dimensions]]`: `dimensions`
-    - `\[\[ViewedArrayBuffer]]`: `buffer`
-    - `\[\[ByteOffset]]`: offset
-    - `\[\[Opacity]]`: opacity
+    - `[[TypeDescriptor]]``: `typeDescriptor`
+    - `[[Dimensions]]`: `dimensions`
+    - `[[ViewedArrayBuffer]]`: `buffer`
+    - `[[ByteOffset]]`: offset
+    - `[[Opacity]]`: opacity
 1. Otherwise, let `structure` be `typeDescriptor.\[\[Structure]]`
 1. If `structure` is `object`, load and return object from `buffer` at `offset`
 1. Otherwise, if `structure` is `any`, load and return value from `buffer` at `offset`
