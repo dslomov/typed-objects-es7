@@ -1,5 +1,11 @@
 # Typed Objects
 
+## Module
+
+All top-level names are defined in a typed objects module, the precise
+path of which is not yet defined. For now, we shall refer to it as The
+Module (capitalized for easier search-and-replace).
+
 ## Overview
 
 _Structure_: either
@@ -7,7 +13,7 @@ _Structure_: either
     ``any``, ``string``, ``object`` (_ground structures_)
   - an ordered list of _FieldRecord_s.
 
-_FieldRecord_: a triple of {``name`` : property name, ``byteOffset`` : integer, ``type`` : _TypeObject_ }. 
+_FieldRecord_: a triple of {``name`` : property name, ``type`` : _TypeObject_ }. 
 
 _Dimensions_: either `Nil` or `Cons(int, Dimensions)`
 
@@ -25,7 +31,6 @@ Type descriptors carry the following internal slots:
 Type descriptors represent a shape of typed object. Identical typed objects have identical type descriptor. Type descriptors act as prototypes of typed objects.
 
 All array type objects with the same element type share their type descriptor.
-
 
 ### Ground Type Descriptors
 
@@ -51,6 +56,7 @@ Their other properties are as follows:
   - ``[[object]]``: ``[[Structure]]``: ``object``, ``[[Opacity]]``: *true*.
 
 ## Type Objects
+
 _TypeObject_ is an exotic object, constructable with a type object constructor (StructType or ArrayType). 
 
 Every type object carries the following internal slots:
@@ -61,8 +67,9 @@ For every type object, ``length([[Dimensions]]) == [[Rank]] of [[TypeDescriptor]
 
 ### Ground type objects
 
-The following type objects with ``[[TypeDescriptor]]``s being ground type descriptor ara available to ECMAScript programs
-under the following names:
+The following type objects with ``[[TypeDescriptor]]``s being ground
+type descriptor ara available to ECMAScript programs under the
+following names defined within The Module:
 
   - ``${NAME}`` : ``[[TypeDescriptor]]`` : ``[[${NAME}]]``. TODO nice list
 
@@ -96,27 +103,34 @@ _Typed objects_ are exotic objects that are created from Type Objects. They carr
   - ``[[ByteOffset]]``
   - ``[[Opacity]]``
 
-### ``[[GetOwnProperty]]`` (P) on typed object
-When the ``[[GetOwnProperty]]`` internal method of an exotic typed object O is called with property key P the following steps are taken:
+### \[\[GetOwnProperty]] ( P )
 
-1. Let `typeDescriptor` be `O.\[\[TypeDescriptor]]`
-1. Let `dimensions` be `O.\[\[Dimensions]]`
-1. Let `buffer` be `O.\[\[ViewedArrayBuffer]]`
-1. Let `offset` be `O.\[\[ByteOffset]]`
-1. If `dimensions` is Nil:
-  1. Let `s` be the structure from `typeDescriptor`
-  1. Let field record `r` be a field record with name `P` from `s`
-  1. Return `undefined` if `r` does exist
-  1. Let `value` be the result of `Reify(r.type.\[\[TypeDescriptor]], r.type.\[\[Dimensions]], buffer, offset)`
-  1. Return a PropertyDescriptor `{ \[\[Value]] : value, \[\[Enumerable]]: false, \[\[Writable]]: true, \[\[Configurable]]: false }`
-1. Otherwise, `dimensions` is `Cons(length, remainingDimensions)`:
-  1. Set isInteger to be true if ToInteger(P) is not an abrupt completion, false otherwise
-  1. If isInteger is false, return `undefined`
-  1. Let `i` be the result of `ToInteger(P)`
-  1. Let `s` be `Size(typeDescriptor, remainingDimensions)`
-  1. Let `o` be `s * i + offset`
-  1. Let `value` be the result of `Reify(typeDescriptor, remainingDimensions, buffer, o)`
-  1. Return a PropertyDescriptor `{ \[\[Value]] : value, \[\[Enumerable]]: true, \[\[Writable]]: true, \[\[Configurable]]: false }`
+When the \[\[GetOwnProperty]] internal method of a Typed Object exotic
+object _O_ is called with property key P the following steps are
+taken:
+
+1. Let _typeDescriptor_ be the value of the \[\[TypeDescriptor]]
+   internal slot of _O_.
+1. Let _dimensions_ be the value of the \[\[Dimensions]] internal slot of _O_.
+1. Let _buffer_ be the value of the \[\[ViewedArrayBuffer]] internal slot of _O_.
+1. Let _offset_ be the value of the \[\[ByteOffset]] internal slot of _O_.
+1. If _dimensions_ is Nil:
+  1. Let _s_ be value of the \[\[Structure]] internal slot from _typeDescriptor_.
+  1. Let field record _r_ be a field record with name _P_ from _s_
+  1. Return __undefined__ if _r_ does exist
+  1. Let _o_ be OffsetOf(_s_, _P_) + _offset_
+  1. Let _value_ be Reify(_r.type.\[\[TypeDescriptor]]_, _r.type.\[\[Dimensions]]_, _buffer_, _o_)
+  1. Return a PropertyDescriptor{ \[\[Value]] : value, \[\[Enumerable]]: false,
+     \[\[Writable]]: true, \[\[Configurable]]: false }
+1. Otherwise, assert _dimensions_` is _Cons(length, remainingDimensions)_:
+  1. Set isInteger to be true if ToInteger(P) is not an abrupt
+     completion, false otherwise
+  1. If isInteger is false, return __undefined__
+  1. Let _i_ be the result of _ToInteger(P)_
+  1. Let _o_ be _s * i + offset_
+  1. Let _value_ be Reify(_typeDescriptor_, _remainingDimensions_, _buffer_, _o_)
+  1. Return a PropertyDescriptor{ \[\[Value]] : value, \[\[Enumerable]]: true,
+     \[\[Writable]]: true, \[\[Configurable]]: false }
 
 ### ``[[GetPrototypeOf]]``()
 
@@ -157,68 +171,111 @@ remainingDimensions2)`.
 
 # Type Object Constructors
 
-## ``StructType``
+Each of these names is defined within The Module.
 
-The ``StructType`` object is a constructor-like function that creates type objects. 
+## Type
+
+`Type` is a function that exists solely as an abstract superclass for
+other type objects. It's constructor is a no-op.
+
+### Type.prototype.prototype [getter]
+
+This is a getter which performs the following steps:
+
+1. Let _O_ be the **this** value.
+1. If _O_ does not have a \[\[TypeDescriptor]] internal slot, throw _TypeError_.
+1. Let _typeDescriptor_ be a value of _O_'s \[\[TypeDescriptor]] internal slot.
+1. Return _typeDescriptor_.
+
+### Type.prototype.arrayType(length) [function]
+
+1. Let _O_ be the **this** value.
+1. If IsTypeObject(_O_) is false, throw *TypeError*.
+1. Let _typeDescriptor_ be a value of _O_'s \[\[TypeDescriptor]] internal slot.
+1. Let _numberLength_ be ToNumber(_length_)
+1. Let _elementLength_ be ToLength(_numberLength)
+1. ReturnIfAbrupt(_elementLength_)
+1. If SameValueZero(_numberLength_, _elementLength_) is false, then throw _RangeError_.
+1. Let _arrayDescriptor_ be GetOrCreateArrayTypeDescriptor(_typeDescriptor_).
+1. ReturnIfAbrupt(_arrayDescriptor_)
+1. Let _R_ be a newly created _TypeObject_.
+1. Set the \[\[TypeDescriptor]] internal slot of _R_ to _arrayDescriptor_.
+1. Let _newDimesions_ be a result of `Cons(N, dimensions)`
+1. Set the \[\[Dimensions]] internal slot of _R_ to _newDimensions_.
+1. Return _R_.
+
+### Type.prototype.opaqueType() [function]
+
+1. Let _O_ be the **this** value.
+1. If IsTypeObject(_O_) is false, throw *TypeError*.
+1. Let _typeDescriptor_ be a value of _O_'s \[\[TypeDescriptor]] internal slot.
+1. Let _dimensions_ be a value of _O_'s \[\[Dimensions]] internal slot.
+1. Let _opaqueDescriptor_ be GetOrCreateOpaqueTypeDescriptor(_typeDescriptor_).
+1. ReturnIfAbrupt(_opaqueDescriptor_)
+1. Let _R_ be a newly created _TypeObject_.
+1. Set the \[\[TypeDescriptor]] internal slot of _R_ to _opaqueDescriptor_.
+1. Set the \[\[Dimensions]] internal slot of _R_ to _dimensions__.
+1. Return _R_.
+
+## StructType
+
+The StructType object is a constructor-like function that creates type objects. 
 
 ### ``StructType``(object)
 
-``StructType`` called with _object_ argument performs the following steps:
-
-TODO: Opaque structures
+StructType called with an object argument _object_ performs the following steps:
 
 1. Assert: Type\(_object_) is Object.
-1. Let _O_ be *this* value.
-1. If _O_ does not have ``[[TypeDescriptor]]`` internal slots, throw *TypeError*. (TODO check other slots)
-1. Let _currentOffset_ be zero.
+1. Let _O_ be the **this** value.
+1. If IsTypeObject(_O_) is false, throw *TypeError*.
+1. Let _currentOffset_ be 0.
+1. Let _maxAlignment_ be 1.
 1. Let _structure_ be an empty list.
-1. For each own property key _P_ of _object_, iterated in the standard own property iteration order:
-    1. Let _fieldType_ be a result of internal operation Get(_P_, _O_) on object _O_.
-    1. If _fieldType_ is not a type object, throw _TypeError_.
+1. For each own property key _P_ of _object_, iterated in the standard
+   own property iteration order:
+    1. Let _fieldType_ be the result of Get(_object_, _P_).
+    1. ReturnIfAbrupt(_fieldType_).
+    1. If IsTypeObject(_fieldType_) is false, throw _TypeError_.
     1. Let _alignment_ be a result of Alignment\(_fieldType_).
-    1. Set _currentOffset_ to a minimal integer equal to or greater than _currentOffset_ that 
-       is evenly divisible by _alignment_.
-    1. Let _r_ be a field record with _name_ equal to _fieldName_, _byteOffset_ equal to _currentOffset_,
-       and _type_ equal to _fieldType_.
+    1. Let _maxAlignment_ be the maximum of _alignment_ and _maxAlignment_.
+    1. Set _currentOffset_ to AlignTo(_currentOffset_, _alignment_).
+    1. Let _r_ be a field record with _name_ equal to _fieldName_,
+       _byteOffset_ equal to _currentOffset_, and _type_ equal to
+       _fieldType_.
     1. Add _r_ to the end of _structure_ list.
-    1. Let _s_ be Size\(_fieldType_\).
-    1. ReturnIfAbrupt\(_s_\).
+    1. Let _s_ be Size(_fieldType_).
+    1. ReturnIfAbrupt(_s_).
     1. Set _currentOffset_ to _currentOffset_ + _s_. 
-1. Let _size_ be _currentOffset_.
+1. Let _size_ be AlignTo(_currentOffset_, _maxAlignment_).
 1. Let _typeDescriptor_ be CreateStructTypeDescriptor(_structure_).
 1. Set _O_'s ``[[TypeDescriptor]]`` to _typeDescriptor_.
 1. Set _O_'s ``prototype`` property to _typeDescriptor_.
 1. Make _O_'s ``prototype`` property *read-only* and *non-configurable*.
 1. Return _O_.
 
-### ``StructType.prototype.ArrayType``(N)
-
-TODO: convert N to integer number properly.
-
-1. Let _O_ be *this* value.
-1. Let _typeDescriptor_ be a value of _O_'s ``[[TypeDescriptor]]`` internal slot.
-2. Let _structure_ be _ownTypeDescriptor_'s ``[[Structure]]``.
-3. Let _dimensions_ be _O_'s ``[[Dimensions]]``.
-5. Let _arrayDescriptor_ be GetOrCreateArrayTypeDescriptor(_typeDescriptor_)
-5. Create a new _TypeObject_ _result_. TODO.
-6. Set _result_'s ``[[TypeDescriptor]]`` to _arrayDescriptor_.
-6. Set _result_'s ``prototype`` to _arrayDescriptor_.
-6. Set _result_'s ``prototype`` property *read-only* and *non-configurable*.
-7. Let _newDimesions_ be a result of appending _N_ to _dimensions_.
-8. Set _result_'s ``[[Dimensions]]`` to _newDimensions_.
-8. Return _result_.
-
-### ``StructType.prototype.OpaqueType``
-
-TODO: A copy of *this* with \[\[Opacity\]] set to *false* if it is true, *this* otherwise + appropriate caching.
-
 # Abstract Operations
+
+## AlignTo(value, alignment)
+
+Returns the minimal integer equal to or greater than _value_
+that is evenly divisible by _alignment_.
+
+## IsTypeObject(_O_)
+
+The abstract operation IsTypeObject checks for the type object branch
+on an object.
+
+1. If Type(_O_) is not Object, return __false__.
+1. If _O_ does not a \[\[TypeDescriptor]] internal slot, return __false__.
+1. If _O_ does have a \[\[ViewedArrayBuffer]] internal slot, return __false__.
+1. Return __true__.
 
 ## Alignment(typeDescriptor)
 
 1. Let _S_ be a value of _typeDescriptor_'s `[[Structure]]`` internal slot.
-2. If _S_ is a ground structure, return Size(_S_).
-1. Otherwise, return a maximum of Alignment(TypeDescriptor(_t_)) where _t_ goes over values of _fieldType_ properties of field records in _S_. 
+1. If _S_ is a ground structure, return Size(_S_).
+1. Otherwise, return a maximum of Alignment(TypeDescriptor(_t_)) where _t_
+   goes over values of _fieldType_ properties of field records in _S_. 
 
 ## Size(typeObject)
 
@@ -238,17 +295,28 @@ TODO: A copy of *this* with \[\[Opacity\]] set to *false* if it is true, *this* 
    1. 4 for *uint32*, *int32*, *float32*.
    1. 8 for *float64*.
    1. An implementation-defined value for *object*, *string*, or *any*
-1. Otherwise:
-    1. Let _currentOffset_ be zero.
-    1. For each field record _r_ in _structure_:
-        1. Let _fieldType_ be _r_._fieldType_.
-        1. Let _alignment_ be a result of Alignment\(_fieldType_).
-        1. Set _currentOffset_ to a minimal integer equal to or greater than _currentOffset_ that 
-           is evenly divisible by _alignment_.
-        1. Let _s_ be Size\(_fieldType_\).
-        1. Set _currentOffset_ to _currentOffset_ + _s_. 
-    1. Return _currentOffset_.
+1. Otherwise, _structure_ is a list of field records:
+   1. Return OffsetOf(_structure_).
 
+## OffsetOf(fieldRecords, name?)
+
+Returns the offset of the field named `name` in a list of field
+records. The `name` argument is optional.
+
+1 Let *l* be the length of *fieldRecords*.
+1. Let _size_ be 0.
+1. Let _alignment_ be 1.
+1. Let _i_ be 0.
+1. While _i_ less than _l_:
+  1. Let _fr_ be the _i_th field record in _fieldRecords_.
+  1. Let _a_ be Alignment(_fr.type_).
+  1. Let _alignment_ be the maximum of _a_ and _alignment_.
+  1. Set _size_ to AlignTo(_size_, _a_).
+  1. If _name_ is provided, and _fr.name_ equals _name_, return _size_.
+  1. Let _s_ be Size(_fr_).
+  1. Set _size_ to _size_ plus _s_.
+1. Set _size_ to AlignTo(_size_, _alignment_).
+1. Return _size_.
 
 ## CreateStructTypeDescriptor(_structure_)
 
@@ -271,7 +339,6 @@ Creates a new type descriptor that describes an array with elements of type desc
 4. Set _result_'s ``[[Opacity]]`` to _typeDescriptor_'s ``[[Opacity]]`.
 5. Set _result_'s ``[[ArrayDescriptor]]`` to ``undeifined``.
 6. Return _result_.
-7. 
 
 ## GetOrCreateArrayTypeDescriptor(_typeDescriptor_)
 
@@ -280,6 +347,21 @@ Creates a new type descriptor that describes an array with elements of type desc
 3. Let _result_ be CreateArrayTypeDescriptor(_typeDescriptor_).
 4. Set ``[[ArrayDescriptor]]`` of _typeDescriptor_ to _result_.
 5. Return _result_.
+
+## GetOrCreateOpaqueTypeDescriptor(_typeDescriptor_)
+
+1. Let _cached_ be the \[\[OpaqueDescriptor]] internal slot of _typeDescriptor_.
+1. If _cached_ is not ``undefined``, return _cached_.
+1. Let _R_ be a new type descriptor object.
+1. ReturnIfAbrupt(_R_)
+1. Let _structure_ be the value of the \[\[Structure]] internal slot of _typeDescriptor_.
+1. Let _rank_ be the value of the \[\[Rank]] internal slot of _typeDescriptor_.
+1. Set the \[\[Structure]] internal slot of _R_ to _structure_.
+1. Set the \[\[Rank]] internal slot of _R_ to _rank_.
+1. Set the \[\[Opacity]] internal slot of _R_ to true.
+1. Set the \[\[ArrayDescriptor]] internal slot of _R_ to undefined.
+1. Set the \[\[OpaqueDescriptor]] internal slot of _R_ to _R_.
+1. Return _R_.
 
 ## CreateTypedObjectFromBuffer(arrayBuffer, byteOffset, typeObject)
 
