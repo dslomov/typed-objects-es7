@@ -24,9 +24,7 @@ _TypeDescriptor_ is an exotic object that represents a shape of a typed object.
 Type descriptors carry the following internal slots:
   - ``[[Structure]]``, should have a _Structure_ value.
   - ``[[Rank]]``, an integer.
-  - ``[[Opacity]]``, a boolean.
   - ``[[ArrayDescriptor]]``, either ``undefined`` or a _TypeDescriptor_.
-  - ``[[OpaqueDescriptor]]``, either ``undefined`` or a _TypeDescriptor_.
 
 Type descriptors represent a shape of typed object. Identical typed objects have identical type descriptor. Type descriptors act as prototypes of typed objects.
 
@@ -38,22 +36,21 @@ There is a fixed set of _ground type descriptors_. Their
 ``[[Structure]]``s are _ground structures_.
 
 All ground type descriptors are have ``[[Rank]]`` equal to 0.  Their
-``[[ArrayDescriptor]]`` and ``[[OpaqueDescriptor]]`` internal slots
-are initially ``undefined``.
+``[[ArrayDescriptor]]`` internal slot is initially ``undefined``.
 
 Their other properties are as follows:
 
-  - ``[[uint8]]``: ``[[Structure]]``: ``uint8``, ``[[Opacity]]``: *false*.
-  - ``[[int8]]``: ``[[Structure]]``: ``int8``, ``[[Opacity]]``: *false*.
-  - ``[[uint16]]``: ``[[Structure]]``: ``uint16``, ``[[Opacity]]``: *false*.
-  - ``[[int16]]``: ``[[Structure]]``: ``int16``, ``[[Opacity]]``: *false*.
-  - ``[[uint32]]``: ``[[Structure]]``: ``uint32``, ``[[Opacity]]``: *false*.
-  - ``[[int32]]``: ``[[Structure]]``: ``int32``, ``[[Opacity]]``: *false*.
-  - ``[[float32]]``: ``[[Structure]]``: ``float32``, ``[[Opacity]]``: *false*.
-  - ``[[float64]]``: ``[[Structure]]``: ``float64``, ``[[Opacity]]``: *false*.
-  - ``[[any]]``: ``[[Structure]]``: ``any``, ``[[Opacity]]``: *true*.
-  - ``[[string]]``: ``[[Structure]]``: ``string``, ``[[Opacity]]``: *true*.
-  - ``[[object]]``: ``[[Structure]]``: ``object``, ``[[Opacity]]``: *true*.
+  - ``[[uint8]]``: ``[[Structure]]``: ``uint8``.
+  - ``[[int8]]``: ``[[Structure]]``: ``int8``.
+  - ``[[uint16]]``: ``[[Structure]]``: ``uint16``.
+  - ``[[int16]]``: ``[[Structure]]``: ``int16``.
+  - ``[[uint32]]``: ``[[Structure]]``: ``uint32``.
+  - ``[[int32]]``: ``[[Structure]]``: ``int32``.
+  - ``[[float32]]``: ``[[Structure]]``: ``float32``.
+  - ``[[float64]]``: ``[[Structure]]``: ``float64``.
+  - ``[[any]]``: ``[[Structure]]``: ``any``.
+  - ``[[string]]``: ``[[Structure]]``: ``string``.
+  - ``[[object]]``: ``[[Structure]]``: ``object``.
 
 ## Type Objects
 
@@ -130,8 +127,8 @@ taken:
   1. Let _i_ be the result of _ToInteger(P)_
   1. Let _o_ be _s * i + offset_
   1. Let _value_ be Reify(_typeDescriptor_, _remainingDimensions_, _buffer_, _o_)
-  1. Return a PropertyDescriptor{ \[\[Value]] : value, \[\[Enumerable]]: true,
-     \[\[Writable]]: true, \[\[Configurable]]: false }
+  1. Return a PropertyDescriptor{ ``[[Value]]`` : value, ``[[Enumerable]]``: true,
+     ``[[Writable]]``: true, ``[[Configurable]]``: false }
 
 ### ``[[GetPrototypeOf]]``()
 
@@ -165,10 +162,10 @@ All three algorithms are modified in the same way:
       
 ### SameDimensions(d1, d2)
 
-SameDimensions holds if `d1` and `d2` are both Nil, or if `d1 =
-Cons(l, remainingDimensions1)` and `d2 = cons(l,
-remainingDimensions2)` and `SameDimensions(remainingDimensions1,
-remainingDimensions2)`.
+SameDimensions holds if `d1` and `d2` are both ``Nil``, or if `d1 =
+Cons(l, remainingDimensions1)` and `d2 = Cons(l,
+remainingDimensions2)` and SameDimensions(remainingDimensions1,
+remainingDimensions2).
 
 # Type Object Constructors
 
@@ -184,8 +181,8 @@ other type objects. It's constructor is a no-op.
 This is a getter which performs the following steps:
 
 1. Let _O_ be the **this** value.
-1. If _O_ does not have a \[\[TypeDescriptor]] internal slot, throw _TypeError_.
-1. Let _typeDescriptor_ be a value of _O_'s \[\[TypeDescriptor]] internal slot.
+1. If _O_ does not have a ``[[TypeDescriptor]]`` internal slot, throw _TypeError_.
+1. Let _typeDescriptor_ be a value of _O_'s ``[[TypeDescriptor]]`` internal slot.
 1. Return _typeDescriptor_.
 
 ### Type.prototype.arrayType(length) [function]
@@ -194,7 +191,7 @@ This is a getter which performs the following steps:
 1. If IsTypeObject(_O_) is false, throw *TypeError*.
 1. Let _typeDescriptor_ be a value of _O_'s \[\[TypeDescriptor]] internal slot.
 1. Let _numberLength_ be ToNumber(_length_)
-1. Let _elementLength_ be ToLength(_numberLength)
+1. Let _elementLength_ be ToLength(_numberLength_)
 1. ReturnIfAbrupt(_elementLength_)
 1. If SameValueZero(_numberLength_, _elementLength_) is false, then throw _RangeError_.
 1. Let _arrayDescriptor_ be GetOrCreateArrayTypeDescriptor(_typeDescriptor_).
@@ -203,19 +200,6 @@ This is a getter which performs the following steps:
 1. Set the \[\[TypeDescriptor]] internal slot of _R_ to _arrayDescriptor_.
 1. Let _newDimesions_ be a result of `Cons(N, dimensions)`
 1. Set the \[\[Dimensions]] internal slot of _R_ to _newDimensions_.
-1. Return _R_.
-
-### Type.prototype.opaqueType() [function]
-
-1. Let _O_ be the **this** value.
-1. If IsTypeObject(_O_) is false, throw *TypeError*.
-1. Let _typeDescriptor_ be a value of _O_'s \[\[TypeDescriptor]] internal slot.
-1. Let _dimensions_ be a value of _O_'s \[\[Dimensions]] internal slot.
-1. Let _opaqueDescriptor_ be GetOrCreateOpaqueTypeDescriptor(_typeDescriptor_).
-1. ReturnIfAbrupt(_opaqueDescriptor_)
-1. Let _R_ be a newly created _TypeObject_.
-1. Set the \[\[TypeDescriptor]] internal slot of _R_ to _opaqueDescriptor_.
-1. Set the \[\[Dimensions]] internal slot of _R_ to _dimensions__.
 1. Return _R_.
 
 ## StructType
@@ -284,9 +268,9 @@ on an object.
 
 ## Size(structure, dimensions)
 
-1. If `dimensions` is `Nil`, return `Size(structure)`
-2. If `dimensions` is `Cons(length, remainingDimensions)`,
-   return `Size(structure, remainingDimensions) * length`.
+1. If _dimensions_ is `Nil`, return Size(structure)
+2. If _dimensions_ is `Cons(length, remainingDimensions)`,
+   return Size(_structure_, _remainingDimensions_) * _length_.
 
 ## Size(structure)
 
@@ -301,8 +285,8 @@ on an object.
 
 ## OffsetOf(fieldRecords, name?)
 
-Returns the offset of the field named `name` in a list of field
-records. The `name` argument is optional.
+Returns the offset of the field named _name_ in a list of field
+records. The _name_ argument is optional.
 
 1 Let *l* be the length of *fieldRecords*.
 1. Let _size_ be 0.
@@ -327,7 +311,6 @@ Creates a new type descriptor that describes a struct.
 1. Set _result_'s ``[[Structure]]`` to _structure_.
 1. Set _result_'s ``[[Rank]]`` to 0.
 1. Set _result_'s ``[[ArrayDescriptor]]`` to ``undefined``.
-1. Set _result_'s ``[[Opacity]]`` to Opaque(``structure``).
 1. Return _result_.
   
 ## CreateArrayTypeDescriptor(_typeDescriptor_)
@@ -336,9 +319,8 @@ Creates a new type descriptor that describes an array with elements of type desc
 
 1. Let _result_ be a new _TypeDescriptor_ TODO: proper spec
 2. Set _result_'s ``[[Structure]]`` to _typeDescriptor_'s ``[[Structure]]``.
-3. Set _result_'s ``[[Rank]]`` to _typeDescriptor_'s ``Rank`` + 1
-4. Set _result_'s ``[[Opacity]]`` to _typeDescriptor_'s ``[[Opacity]]`.
-5. Set _result_'s ``[[ArrayDescriptor]]`` to ``undeifined``.
+3. Set _result_'s ``[[Rank]]`` to _typeDescriptor_'s ``[[Rank]]`` + 1
+5. Set _result_'s ``[[ArrayDescriptor]]`` to ``undefined``.
 6. Return _result_.
 
 ## GetOrCreateArrayTypeDescriptor(_typeDescriptor_)
@@ -349,24 +331,9 @@ Creates a new type descriptor that describes an array with elements of type desc
 4. Set ``[[ArrayDescriptor]]`` of _typeDescriptor_ to _result_.
 5. Return _result_.
 
-## GetOrCreateOpaqueTypeDescriptor(_typeDescriptor_)
-
-1. Let _cached_ be the \[\[OpaqueDescriptor]] internal slot of _typeDescriptor_.
-1. If _cached_ is not ``undefined``, return _cached_.
-1. Let _R_ be a new type descriptor object.
-1. ReturnIfAbrupt(_R_)
-1. Let _structure_ be the value of the \[\[Structure]] internal slot of _typeDescriptor_.
-1. Let _rank_ be the value of the \[\[Rank]] internal slot of _typeDescriptor_.
-1. Set the \[\[Structure]] internal slot of _R_ to _structure_.
-1. Set the \[\[Rank]] internal slot of _R_ to _rank_.
-1. Set the \[\[Opacity]] internal slot of _R_ to true.
-1. Set the \[\[ArrayDescriptor]] internal slot of _R_ to undefined.
-1. Set the \[\[OpaqueDescriptor]] internal slot of _R_ to _R_.
-1. Return _R_.
-
 ## CreateTypedObjectFromBuffer(arrayBuffer, byteOffset, typeObject)
 
-1. If _byteOffset_ + Size\(_typeObject_\) is bigger than _arrayBuffer_'s \[\[ByteLength\]\], throw *RangeError*.
+1. If _byteOffset_ + Size\(_typeObject_\) is bigger than _arrayBuffer_'s ``[[ByteLength]]``, throw *RangeError*.
 1. Let _s_ be _typeObject_'s \[\[Structure\]\].
 1. Let _O_ be a result of ObjectCreate(_typeObject_.*prototype*, 
     (\[\[Structure\]\], \[\[ViewedArrayBuffer\]\], \[\[ByteOffset\]\], \[\[TypeObject\]\])).
@@ -381,62 +348,62 @@ Creates a new type descriptor that describes an array with elements of type desc
 1. Let `buffer` be a new buffer of size `Size(typeObject)`
 1. Call `Initialize(typeObject.\[\[TypeDescriptor]], typeObject.\[\[Dimensions]], buffer, 0)`
 1. Let `typeObject` be a new typed object with the following properties:
-  - `\[\[TypeDescriptor]]``: `typeObject.\[\[TypeDescriptor]]`
-  - `\[\[Dimensions]]`: `typeObject.\[\[Dimensions]]
-  - `\[\[ViewedArrayBuffer]]`: `buffer`
-  - `\[\[ByteOffset]]`: 0
-  - `\[\[Opacity]]`: `typeObject.\[\[TypeDescriptor]].Opacity`
+  - `[[TypeDescriptor]]``: typeObject.``[[TypeDescriptor]]``
+  - `[[Dimensions]]`: typeObject.``[[Dimensions]]``
+  - `[[ViewedArrayBuffer]]`: `buffer`
+  - `[[ByteOffset]]`: 0
+  - `[[Opacity]]`: Opaque(_typeObject_.``[[TypeDescriptor]]``.``[[Structure]]``)
 - Return `typeObject`
 
 ## Default(typeDescriptor)
 
 Where:
-- `typeDescriptor` is a ground type descriptor
+- _typeDescriptor_ is a ground type descriptor
 
-1. Let `structure` be `typeDescriptor.\[\[Structure]]`
-1. If `structure` is `object`, return `null`
-1. Otherwise, if `structure` is `any`, return `undefined`
-1. Otherwise, if `structure` is `string`, return `""`
+1. Let _structure_ be _typeDescriptor_.``[[Structure]]``
+1. If _structure_ is `object`, return `null`
+1. Otherwise, if _structure_ is `any`, return `undefined`
+1. Otherwise, if _structure_ is `string`, return `""`
 1. Otherwise, return 0
 
 ## Coerce(typeDescriptor, value)
 
 Where:
-- `typeDescriptor` is a ground type descriptor
+- _typeDescriptor_ is a ground type descriptor
 
-1. Let `structure` be `typeDescriptor.\[\[Structure]]`
-1. If `structure` is `object`:
-  1. If `value` is an object, return `value`
+1. Let _structure+ be _typeDescriptor_.``[[Structure]]``
+1. If _structure_ is `object`:
+  1. If _value_ is an object, return `value`
   1. Throw TypeError
-1. Otherwise, if `structure` is `any`, return value
-1. Otherwise, if `structure` is `string`, return `ToString(value)`
-1. Otherwise, if `structure` is `float32` or `float64`, return `ToNumber(value)`
-1. Otherwise, return `ToInteger(value)`
+1. Otherwise, if _structure_ is `any`, return value
+1. Otherwise, if _structure_ is `string`, return ToString(_value_)
+1. Otherwise, if _structure_ is `float32` or `float64`, return ToNumber(_value_)
+1. Otherwise, return ToInteger(_value_)
 
 ## Initialize(typeDescriptor, dimensions, buffer, offset)
 
 // TODO Formalify
 
 Where:
-- `typeDescriptor` is a type descriptor
-- `dimensions` is an array of integers
-- `buffer` is an array buffer
-- `offset` is an integer
-- `value` is an arbitrary JS value
+- _typeDescriptor_ is a type descriptor
+- _dimensions_ is an array of integers
+- _buffer_ is an array buffer
+- _offset_ is an integer
+- _value_ is an arbitrary JS value
 
-1. If `dimensions` is `Cons(length, remainingDimensions)`:
-  1. Let `size` be `Size(typeDescriptor, remainingDimensions)`
-  1. For each `i` from `0` to `length - 1`:
-    1. Call `Initialize(typeDescriptor, remainingDimensions, buffer, offset + i * size)`
+1. If _dimensions_ is `Cons(length, remainingDimensions)`:
+  1. Let _size_ be Size(_typeDescriptor_, _remainingDimensions_)
+  1. For each _i_ from 0 to _length_ - 1:
+    1. Call Initialize(_typeDescriptor_, _remainingDimensions_, _buffer_, _offset_ + _i_ * _size_)
   1. Return
-1. Otherwise, if `typeDescriptor` is a ground type descriptor:
-  1. Call `ConvertAndCopyTo(typeDescriptor, dimensions, buffer, offset, Default(typeDescriptor))`
-1. Otherwise, `structure` must be a list of field records:
-  1. For each field record `{name, byteOffset, type}` in `structure`:
-    1. Let `fieldOffset` be `offset + byteOffset`
-    1. Let `fieldTypeDescriptor` be `type.\[\[TypeDescriptor]]`
-    1. Let `fieldDimensions` be `type.\[\[Dimensions]]`
-    1. Call `Initialize(fieldTypeDescriptor, fieldDimensions, buffer, fieldOffset)`
+1. Otherwise, if _typeDescriptor_ is a ground type descriptor:
+  1. Call ConvertAndCopyTo(_typeDescriptor_, _dimensions_, _buffer_, _offset_, Default(_typeDescriptor_)))
+1. Otherwise, _structure_ must be a list of field records:
+  1. For each field record `{name, byteOffset, type}` in _structure_:
+    1. Let _fieldOffset_ be _offset_ + _byteOffset_
+    1. Let _fieldTypeDescriptor_ be type.``[[TypeDescriptor]]``
+    1. Let _fieldDimensions_ be type.``[[Dimensions]]``
+    1. Call Initialize(_fieldTypeDescriptor_, _fieldDimensions_, _buffer_, _fieldOffset_)
 
 ## ConvertAndCopyTo(typeDescriptor, dimensions, buffer, offset, value)
 
