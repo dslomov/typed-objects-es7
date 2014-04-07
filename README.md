@@ -131,6 +131,16 @@ taken:
   1. Return a PropertyDescriptor{ ``[[Value]]`` : value, ``[[Enumerable]]``: true,
      ``[[Writable]]``: true, ``[[Configurable]]``: false }
 
+### ``[[Set]]`` ( P, V, Receiver)
+
+When the ``[[Set]]`` internal method of an exotic typed object O is called with property key P, value V, and ECMAScript language value Receiver, the following steps are taken:
+
+1. Assert: IsPropertyKey(P) is true.
+1. If Type(P) is String and if SameValue(O, Receiver) is true, then
+   1. Return the result of SetFieldInTypedObject(O, P, V).
+1. Otherwise Return the result of calling the default ordinary object ``[[Set]]`` internal method (9.1.8) on O passing P, V, and Receiver as arguments
+
+
 ### ``[[GetPrototypeOf]]``()
 
 When ``[[GetPrototypeOf]]`` is called on typed object _O_, the following steps are taken:
@@ -469,13 +479,14 @@ Where:
 1. If _dimensions_ is `Cons(length, remainingDimensions)` OR
    _typeDescriptor_ is not a ground type descriptor:
   1. Return a new typed object with the following properties:
-    - `[[TypeDescriptor]]``: `typeDescriptor`
-    - `[[Dimensions]]`: `dimensions`
-    - `[[ViewedArrayBuffer]]`: `buffer`
-    - `[[ByteOffset]]`: offset
-    - `[[Opacity]]`: opacity
-1. Otherwise, let `structure` be `typeDescriptor.\[\[Structure]]`
-1. If `structure` is `object`, load and return object from `buffer` at `offset`
-1. Otherwise, if `structure` is `any`, load and return value from `buffer` at `offset`
-1. Otherwise, if `structure` is `string`, load and return string from `buffer` at `offset`
-1. Otherwise, return `GetValueInBuffer(buffer, offset, value, typeDescriptor)`
+    - `[[TypeDescriptor]]``: _typeDescriptor_
+    - `[[Dimensions]]`: _dimensions_
+    - `[[ViewedArrayBuffer]]`: _buffer_
+    - `[[ByteOffset]]`: _offset_
+    - `[[Opacity]]`: _opacity_
+1. Otherwise, let _structure_ be _typeDescriptor_'s ``[[Structure]]``
+1. If _structure_ is `object`, load and return object from _buffer_ at _offset_.
+1. Otherwise, if _structure_ is `any`, load and return value from _buffer_ at _offset_.
+1. Otherwise, if _structure_ is `string`, load and return string from _buffer_ at _offset_.
+1. Otherwise, return GetValueInBuffer(_buffer_, _offset_, _value_, _typeDescriptor_).
+ 
