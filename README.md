@@ -112,12 +112,13 @@ taken:
 1. Let _dimensions_ be the value of the ``[[Dimensions]]`` internal slot of _O_.
 1. Let _buffer_ be the value of the ``[[ViewedArrayBuffer]]`` internal slot of _O_.
 1. Let _offset_ be the value of the ``[[ByteOffset]]`` internal slot of _O_.
+2. Let _opacity_ be the value of the ``[[OPacity]]`` internal slot of _O_.
 1. If _dimensions_ is ``Nil``:
   1. Let _s_ be value of the ``[[Structure]]`` internal slot from _typeDescriptor_.
   1. Let field record _r_ be a field record with name _P_ from _s_
   1. Return __undefined__ if _r_ does not exist
   1. Let _o_ be OffsetOf(_s_, _P_) + _offset_
-  1. Let _value_ be Reify(_r.type.``[[TypeDescriptor]]``, _r.type.``[[Dimensions]]``_, _buffer_, _o_)
+  1. Let _value_ be Reify(_r.type.``[[TypeDescriptor]]``, _r.type.``[[Dimensions]]``_, _buffer_, _o_, _opacity_)
   1. Return a PropertyDescriptor{ ``[[Value]]`` : value, ``[[Enumerable]]``: false,
      ``[[Writable]]``: true, ``[[Configurable]]``: false }
 1. Otherwise, assert _dimensions_` is _Cons(length, remainingDimensions)_:
@@ -126,7 +127,7 @@ taken:
   1. If isInteger is false, return __undefined__
   1. Let _i_ be the result of _ToInteger(P)_
   1. Let _o_ be _s * i + offset_
-  1. Let _value_ be Reify(_typeDescriptor_, _remainingDimensions_, _buffer_, _o_)
+  1. Let _value_ be Reify(_typeDescriptor_, _remainingDimensions_, _buffer_, _o_, _opacity_)
   1. Return a PropertyDescriptor{ ``[[Value]]`` : value, ``[[Enumerable]]``: true,
      ``[[Writable]]``: true, ``[[Configurable]]``: false }
 
@@ -302,6 +303,22 @@ records. The _name_ argument is optional.
   1. Set _size_ to _size_ plus _s_.
 1. Set _size_ to AlignTo(_size_, _alignment_).
 1. Return _size_.
+ 
+
+## Opaque(_structure_)
+
+Returns true if typed objects with structure _structure_ must be opaque, false otherwise.
+
+1. If _structure_ is a ground structure, return:
+    1. *true* for ``any``, ``string`` or ``object``.
+    2. *false* for all other gorund structures
+1. Otherwise _structure_ is a list of field records.
+    1. For every field record { ``name`` : _name_, ``type``: _typeObject_ }:
+       1. Let _d_ be _typeObject_'s ``[[TypeDescriptor]]``.
+       2. Let _s_ be _d_'s ``[[Structure]]``.
+       3. If Opaque(_s_), return *true*
+    1. Return *false*.
+
 
 ## CreateStructTypeDescriptor(_structure_)
 
